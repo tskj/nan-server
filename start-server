@@ -1,0 +1,4 @@
+if gcc start-server.c -O3 -o start-server.exe then
+	./start-server.exe
+	rm start-server.exe
+fi
