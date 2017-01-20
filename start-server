@@ -1,4 +1,6 @@
+#!/bin/bash
+
 if gcc start-server.c -Wall -Werror -O3 -o start-server.exe; then
-	./start-server.exe
+	sudo ./start-server.exe
 	rm start-server.exe
 fi

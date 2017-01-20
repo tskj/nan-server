@@ -1,4 +1,4 @@
-#!/bin/bash/nodejs
+#!/usr/bin/nodejs
 
 var http = require("http");
 var fs   = require("fs");
