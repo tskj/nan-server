@@ -9,8 +9,19 @@ function app(req, res) {
 	var action = url.parse(req.url, true).pathname;
 
 	if (nFirstEqual('/bin/', action, 5) || action === '/bin') {
-		res.writeHead(404);
-		res.end('');
+		res.writeHead(404, {'Content-Type': 'text/html'});
+		fs.readFile('lib/not-found.html', 'utf-8', function(err, data) {
+			if (err) throw err;
+			res.write(data);
+			res.end();
+		});
+	} else if (nFirstEqual('/lib/', action, 5) || action === '/lib') {
+		res.writeHead(404, {'Content-Type': 'text/html'});
+		fs.readFile('lib/not-found.html', 'utf-8', function(err, data) {
+			if (err) throw err;
+			res.write(data);
+			res.end();
+		});
 	} else {
 		res.writeHead(	200
 					 ,	{'Content-Type': 'text/plain'}
