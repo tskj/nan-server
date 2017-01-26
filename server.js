@@ -10,7 +10,7 @@ function app(req, res) {
 
 	if (nFirstEqual('/bin/', action, 5) || action === '/bin') {
 		res.writeHead(404);
-		res.end();
+		res.end('');
 	} else {
 		res.writeHead(	200
 					 ,	{'Content-Type': 'text/plain'}
