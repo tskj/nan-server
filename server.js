@@ -5,6 +5,7 @@ var fs   = require("fs");
 var url  = require("url");
 
 var chroot = require('/usr/lib/node_modules/chroot');
+var exec = require('child_process').execFile;
 
 function app(req, res) {
 
@@ -28,7 +29,15 @@ function app(req, res) {
 		res.writeHead(	200
 					 ,	{'Content-Type': 'text/plain; charset=utf-8'}
 					 );
-		res.end('Dette er Node serveren. Hallå!\n\n', 'utf-8');
+		res.write('Dette er Node serveren. Hallå!\n\n', 'utf-8');
+		execFile('./a.out', (error, stdout, stderr) => {
+			if (error instanceof Error) {
+				res.end(error.toString(), 'utf-8');
+				throw error;
+			} else {
+				res.end(stdout, 'utf-8');
+			}
+		});
 	}
 }
 
