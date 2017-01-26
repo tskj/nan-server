@@ -4,6 +4,8 @@ var http = require("http");
 var fs   = require("fs");
 var url  = require("url");
 
+var chroot = require('/usr/lib/node_modules/chroot');
+
 function app(req, res) {
 
 	var action = url.parse(req.url, true).pathname;
@@ -45,6 +47,10 @@ function nFirstEqual(str1, str2, n) {
 }
 
 http.createServer(app).listen(80, function(err) {
-	process.setgid(666);
-	process.setuid(666);
+	try {
+		chroot('/www', 'www', 666);
+	} catch(err) {
+		console.error('Chaning root or user failed.', err);
+		process.exit(1);
+	}
 });
