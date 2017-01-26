@@ -26,9 +26,9 @@ function app(req, res) {
 		});
 	} else {
 		res.writeHead(	200
-					 ,	{'Content-Type': 'text/plain'}
+					 ,	{'Content-Type': 'text/plain; charset=utf-8'}
 					 );
-		res.end('Dette er Node serveren. Hallå!', 'text');
+		res.end('Dette er Node serveren. Hallå!\n\n', 'utf-8');
 	}
 }
 

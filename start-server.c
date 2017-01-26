@@ -18,6 +18,10 @@ int main() {
 		exit(1);
 	}
 
+	close(0);
+	close(1);
+	close(2);
+
 	execl("/usr/bin/nodejs", "nodejs", "bin/server.js", NULL);
 	printf("An error occured starting the nodejs server\n");
 
