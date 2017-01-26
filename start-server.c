@@ -18,7 +18,7 @@ int main() {
 		exit(1);
 	}
 
-	execl("/usr/bin/nodejs", "nodejs", "/home/tarjei/DA-NAN/milestone2/server.js", NULL);
+	execl("/usr/bin/nodejs", "nodejs", "bin/server.js", NULL);
 	printf("An error occured starting the nodejs server\n");
 
 	return 1;

@@ -8,7 +8,7 @@ function app(req, res) {
 	res.writeHead(	200
 				 ,	{'Content-Type': 'text/plain'}
 				 );
-	res.end('Dette er Node serveren. Hallo!', 'text');
+	res.end('Dette er Node serveren. Hallå!', 'text');
 }
 
 http.createServer(app).listen(80, function(err) {
