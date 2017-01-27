@@ -20,7 +20,7 @@ typedef enum { PLAIN
              , CSS
              , PNG
              , XML
-             , XSLT_XML
+             , XSL
              , UNKNOWN
              , NONE
              } mime_t;
@@ -53,8 +53,9 @@ mime_t resolve_extension(char* filename) {
     if (!strcmp(filename + i, "png"))
         return PNG;
     if (!strcmp(filename + i, "xml"))
-        // ToDo: Add support for checking for xslt
         return XML;
+    if (!strcmp(filename + i, "xsl"))
+        return XSL;
  
     return UNKNOWN;
 }
@@ -165,9 +166,11 @@ void send_header(int status_code, char* status, mime_t content_type) {
                     break;
         case PNG:   printf("image/png\n");
                     break;
-        case XML:   printf("text/xml; charset=utf-8\n");
+        case XML:   printf("application/xml; charset=utf-8\n");
                     break;
-        default:    printf("Shouldn't be called except xslt?\n");
+        case XSL:   printf("text/xsl; charset=utf-8\n");
+                    break;
+        default:    printf("Shouldn't be called\n");
     }
 
     printf("Connection: close\n");
