@@ -2,6 +2,55 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+
+#define LOCAL_PORT 80
+#define QUEUE 10
+
+void handle_request() {
+	printf("HTTP/1.0 200 OK\n");
+	printf("Content-Type: text/plain; charset=utf-8\n");
+	printf("Connection: close\n");
+	printf("\n");
+	printf("Camelåså!");
+}
+
+void server() {
+
+	struct sockaddr_in local_address;
+	int sd, incomming_sd;
+
+	sd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int));
+
+	local_address.sin_family		= AF_INET;
+	local_address.sin_port			= htons((u_short) LOCAL_PORT);
+	local_address.sin_addr.s_addr 	= htons(		  INADDR_ANY);
+	
+	if (-1 == bind(sd, (struct sockaddr *) &local_address, sizeof(local_address))) {
+		printf("Could not bind to part %d\n", LOCAL_PORT);
+	}
+
+	listen(sd, QUEUE);
+	while (1) {
+
+		incomming_sd = accept(sd, NULL, NULL);
+
+		if (0 == fork()) {
+
+			dup2(incomming_sd, 0);
+			dup2(incomming_sd, 1);
+			
+			handle_request();
+
+			exit(0);
+
+		} else {
+			close(incomming_sd);
+		}
+	}
+}
 
 int main() {
 
@@ -12,9 +61,23 @@ int main() {
 
 	if (0 != fork()) exit(0);
 
-
 	if (-1 == chdir("/www")) {
 		printf("Could not change working directory\n");
+		exit(1);
+	}
+	
+	if (-1 == chroot("/www")) {
+		printf("Could not change root\n");
+		exit(1);
+	}
+
+	if (-1 == setgid(666)) {
+		printf("Could not drop privileges\n");
+		exit(1);
+	}
+
+	if (-1 == setuid(666)) {
+		printf("Could not change user\n");
 		exit(1);
 	}
 
@@ -22,8 +85,9 @@ int main() {
 	close(1);
 	close(2);
 
-	execl("/usr/bin/nodejs", "nodejs", "bin/server.js", NULL);
-	printf("An error occured starting the nodejs server\n");
+	signal(SIGCHLD, SIG_IGN);
+
+	server();
 
 	return 1;
 }
