@@ -13,7 +13,14 @@ void handle_request() {
 	printf("Content-Type: text/plain; charset=utf-8\n");
 	printf("Connection: close\n");
 	printf("\n");
-	printf("Camelåså!");
+	printf("Camelåså!\n\n");
+
+	fflush(stdout);
+
+	char buffer[4096];
+	if (!write(1, buffer, read(0, buffer, 4096))) {
+		printf("Ingen ting skrive\n");
+	}
 }
 
 void server() {
@@ -30,6 +37,16 @@ void server() {
 	
 	if (-1 == bind(sd, (struct sockaddr *) &local_address, sizeof(local_address))) {
 		printf("Could not bind to part %d\n", LOCAL_PORT);
+	}
+
+	if (-1 == setgid(666)) {
+		printf("Could not drop privileges\n");
+		exit(1);
+	}
+
+	if (-1 == setuid(666)) {
+		printf("Could not change user\n");
+		exit(1);
 	}
 
 	listen(sd, QUEUE);
@@ -68,16 +85,6 @@ int main() {
 	
 	if (-1 == chroot("/www")) {
 		printf("Could not change root\n");
-		exit(1);
-	}
-
-	if (-1 == setgid(666)) {
-		printf("Could not drop privileges\n");
-		exit(1);
-	}
-
-	if (-1 == setuid(666)) {
-		printf("Could not change user\n");
 		exit(1);
 	}
 
