@@ -1,6 +1,7 @@
 #include <string.h>
 
 #define NOT_FOUND_FILE "/lib/not-found.html"
+#define API_PATH "/api"
 
 #define GET_LENGTH 4
 #define PUT_LENGTH 4
@@ -58,7 +59,7 @@ mime_t resolve_extension(char* filename) {
     return UNKNOWN;
 }
 
-int pathIsIllegal(char* req, const char* pattern) {
+int pathIsMatch(char* req, const char* pattern) {
     int i = 0;
     while (1) {
         if (pattern[i] == 0)
@@ -202,11 +203,16 @@ void handle_request() {
     
     int i = 0;
     for (i = 0; i < sizeof(illegal_paths) / sizeof(illegal_paths[0]); i++) {
-        if (pathIsIllegal(header.path, illegal_paths[i])) {
+        if (pathIsMatch(header.path, illegal_paths[i])) {
             send_header(404, "Not Found", HTML);
             send_file(NOT_FOUND_FILE);
             return;
         }
+    }
+
+    if (pathIsMatch(header.path, API_PATH)) {
+        printf("API is comming...");
+        return;
     }
 
     // Simple test:
