@@ -23,7 +23,7 @@ void handle_request() {
 		printf("Ingen ting skrive\n");
 	}
 
-	execl("./a.out", "a.out", NULL);
+	execl("/a.out", "a.out", NULL);
 
 	printf("Feilkode: %d\n", errno);
 }
@@ -87,7 +87,7 @@ int main() {
 		printf("Could not change working directory\n");
 		exit(1);
 	}
-	
+
 	if (-1 == chroot("/www")) {
 		printf("Could not change root\n");
 		exit(1);

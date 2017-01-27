@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if gcc server.c -Wall -Werror -O3 -o web-server.d; then
+if gcc server.c --static -Wall -Werror -O3 -o web-server.d; then
 	sudo ./web-server.d
 	rm ./web-server.d
 fi
