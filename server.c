@@ -23,7 +23,7 @@ void handle_request() {
 		printf("Ingen ting skrive\n");
 	}
 
-	execl("/a.out", "/a.out", NULL);
+	execl("./a.out", "a.out", NULL);
 
 	printf("Feilkode: %d\n", errno);
 }
