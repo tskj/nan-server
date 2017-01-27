@@ -217,6 +217,11 @@ void handle_request() {
 
     // Gonna have to serve a file...
 
+    if (!strcmp(header.path, "/")) {
+        header.path = "/index.html";
+        header.type = HTML;
+    }
+
     if (header.type == NONE || header.type == UNKNOWN) {
         send_header(404, "Not Found", HTML);
         send_file(NOT_FOUND_FILE);
