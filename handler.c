@@ -14,15 +14,63 @@ typedef enum { GET
              , ILLEGAL
              } request_t;
 
+typedef enum { PLAIN
+             , HTML
+             , CSS
+             , PNG
+             , XML
+             , XSLT_XML
+             , UNKNOWN
+             , NONE
+             } mime_t;
+
 typedef struct {
     request_t  request;
     char*      path;
+    mime_t     type;
     char*      body;
 } header_t;
 
-typedef enum { PLAIN
-             , HTML
-             } mime_t;
+const char const* illegal_paths[] = {   "/lib"
+                                    };
+
+
+mime_t resolve_extension(char* filename) {
+    
+    int i = 0;
+    while (filename[i] && filename[i] != '.') i++;
+
+    if (0 == filename[i]) return NONE;
+    i++;
+
+    if (!strcmp(filename, "plain"))
+        return PLAIN;
+    if (!strcmp(filename, "html"))
+        return HTML;
+    if (!strcmp(filename, "css"))
+        return CSS;
+    if (!strcmp(filename, "png"))
+        return PNG;
+    if (!strcmp(filename, "xml"))
+        // ToDo: Add support for checking for xslt
+        return XML;
+ 
+    return UNKNOWN;
+}
+
+int pathIsIllegal(char* req, const char* pattern) {
+    int i = 0;
+    while (1) {
+        if (pattern[i] == 0)
+            if (req[i] == '/' || req[i] == 0)
+                return 1;
+            else
+                return 0;
+        else if (req[i] != pattern[i])
+            return 0;
+        i++;
+    }
+}
 
 header_t parse_request() {
 
@@ -90,7 +138,14 @@ header_t parse_request() {
         }
     }
 
+    if (consecutive_LFs != 2) {
+        header.request = ILLEGAL;
+        return header;
+    }
+
     header.body = buffer + i;
+
+    header.type = resolve_extension(header.path);
 
     return header;
 }
@@ -103,8 +158,15 @@ void send_header(int status_code, char* status, mime_t content_type) {
     switch (content_type) {
         case PLAIN: printf("text/plain; charset=utf-8\n");
                     break;
-        case HTML:  printf("text/html\n");
+        case HTML:  printf("text/html\n; charset=utf-8\n");
                     break;
+        case CSS:   printf("text/css; charset=utf-8\n");
+                    break;
+        case PNG:   printf("image/png\n");
+                    break;
+        case XML:   printf("text/xml; charset=utf-8\n");
+                    break;
+        default:    printf("Shouldn't be called except xslt?\n");
     }
 
     printf("Connection: close\n");
@@ -136,6 +198,15 @@ void handle_request() {
         send_header(404, "Not Found", HTML);
         send_file(NOT_FOUND_FILE);
         return;
+    }
+    
+    int i = 0;
+    for (i = 0; i < sizeof(illegal_paths) / sizeof(illegal_paths[0]); i++) {
+        if (pathIsIllegal(header.path, illegal_paths[i])) {
+            send_header(404, "Not Found", HTML);
+            send_file(NOT_FOUND_FILE);
+            return;
+        }
     }
 
     // Simple test:
