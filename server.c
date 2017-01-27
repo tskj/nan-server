@@ -6,27 +6,10 @@
 #include <errno.h>
 #include <arpa/inet.h>
 
+#include "handler.c"
+
 #define LOCAL_PORT 80
 #define QUEUE 10
-
-void handle_request() {
-	printf("HTTP/1.0 200 OK\n");
-	printf("Content-Type: text/plain; charset=utf-8\n");
-	printf("Connection: close\n");
-	printf("\n");
-	printf("Camelåså!\n\n");
-
-	fflush(stdout);
-
-	char buffer[4096];
-	if (!write(1, buffer, read(0, buffer, 4096))) {
-		printf("Ingen ting skrive\n");
-	}
-
-	execl("/a.out", "a.out", NULL);
-
-	printf("Feilkode: %d\n", errno);
-}
 
 void server() {
 
