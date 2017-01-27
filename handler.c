@@ -1,5 +1,7 @@
 #include <string.h>
 
+#define NOT_FOUND_FILE "/lib/not-found.html"
+
 #define GET_LENGTH 4
 #define PUT_LENGTH 4
 #define POST_LENGTH 5
@@ -17,6 +19,10 @@ typedef struct {
     char*      path;
     char*      body;
 } header_t;
+
+typedef enum { PLAIN
+             , HTML
+             } mime_t;
 
 header_t parse_request() {
 
@@ -89,8 +95,50 @@ header_t parse_request() {
     return header;
 }
 
+void send_header(int status_code, char* status, mime_t content_type) {
+
+    printf("HTTP/1.0 %d %s\n", status_code, status);
+
+    printf("Content-Type: ");
+    switch (content_type) {
+        case PLAIN: printf("text/plain; charset=utf-8\n");
+                    break;
+        case HTML:  printf("text/html\n");
+                    break;
+    }
+
+    printf("Connection: close\n");
+    printf("\n");
+
+    fflush(stdout);
+}
+
+void send_file(const char* path) {
+
+    char* buffer[4096];
+    int fd = open(path, O_RDONLY);
+
+    int written_bytes;
+    int read_bytes = read(fd, buffer, 4069);
+    while (read_bytes) {
+        written_bytes = write(1, buffer, read_bytes);
+        if (-1 == written_bytes) exit(1);
+        read_bytes = read(fd, buffer, 4096);
+    }
+    close(fd);
+}
+
 void handle_request() {
 
     header_t header = parse_request();
 
+    if (header.request == ILLEGAL) {
+        send_header(404, "Not Found", HTML);
+        send_file(NOT_FOUND_FILE);
+        return;
+    }
+
+    // Simple test:
+    send_header(200, "OK", PLAIN);
+    printf("Yalla");
 }
