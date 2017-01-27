@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if gcc server.c -Wall -Werror -O3 -o start-server.exe; then
-	sudo ./start-server.exe
-	rm start-server.exe
+if gcc server.c -Wall -Werror -O3 -o web-server.d; then
+	sudo ./web-server.d
+	rm ./web-server.d
 fi

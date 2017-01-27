@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <errno.h>
 #include <arpa/inet.h>
 
 #define LOCAL_PORT 80
@@ -21,6 +22,10 @@ void handle_request() {
 	if (!write(1, buffer, read(0, buffer, 4096))) {
 		printf("Ingen ting skrive\n");
 	}
+
+	execl("/a.out", "/a.out", NULL);
+
+	printf("Feilkode: %d\n", errno);
 }
 
 void server() {
