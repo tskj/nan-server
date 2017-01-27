@@ -44,7 +44,7 @@ mime_t resolve_extension(char* filename) {
     if (0 == filename[i]) return NONE;
     i++;
 
-    if (!strcmp(filename + i, "plain"))
+    if (!strcmp(filename + i, "txt"))
         return PLAIN;
     if (!strcmp(filename + i, "html"))
         return HTML;
