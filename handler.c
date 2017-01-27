@@ -18,7 +18,7 @@ typedef struct {
     char*      body;
 } header_t;
 
-header_t parse_input() {
+header_t parse_request() {
 
     header_t header;
 
@@ -91,6 +91,6 @@ header_t parse_input() {
 
 void handle_request() {
 
-    header_t header = parse_input();
+    header_t header = parse_request();
 
 }
