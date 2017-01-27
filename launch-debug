@@ -1,0 +1,3 @@
+#!/bin/bash
+
+gcc -g -x c -o debug/unit_test debug/$1

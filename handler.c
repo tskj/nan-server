@@ -18,7 +18,7 @@ typedef struct {
     char*      body;
 } header_t;
 
-void parse_input() {
+header_t parse_input() {
 
     header_t header;
 
@@ -33,7 +33,7 @@ void parse_input() {
         free(buffer);
         buffer = new_buffer;
 
-        read_bytes += read(0, buffer + header_size/2, header_size/2)
+        read_bytes += read(0, buffer + header_size/2, header_size/2);
     }
     
     buffer[read_bytes] = '\0'; // Cannot possibly overflow due to while-loop
