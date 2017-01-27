@@ -44,15 +44,15 @@ mime_t resolve_extension(char* filename) {
     if (0 == filename[i]) return NONE;
     i++;
 
-    if (!strcmp(filename, "plain"))
+    if (!strcmp(filename + i, "plain"))
         return PLAIN;
-    if (!strcmp(filename, "html"))
+    if (!strcmp(filename + i, "html"))
         return HTML;
-    if (!strcmp(filename, "css"))
+    if (!strcmp(filename + i, "css"))
         return CSS;
-    if (!strcmp(filename, "png"))
+    if (!strcmp(filename + i, "png"))
         return PNG;
-    if (!strcmp(filename, "xml"))
+    if (!strcmp(filename + i, "xml"))
         // ToDo: Add support for checking for xslt
         return XML;
  
@@ -159,7 +159,7 @@ void send_header(int status_code, char* status, mime_t content_type) {
     switch (content_type) {
         case PLAIN: printf("text/plain; charset=utf-8\n");
                     break;
-        case HTML:  printf("text/html\n; charset=utf-8\n");
+        case HTML:  printf("text/html; charset=utf-8\n");
                     break;
         case CSS:   printf("text/css; charset=utf-8\n");
                     break;
@@ -215,7 +215,21 @@ void handle_request() {
         return;
     }
 
-    // Simple test:
-    send_header(200, "OK", PLAIN);
-    printf("Yalla");
+    // Gonna have to serve a file...
+
+    if (header.type == NONE || header.type == UNKNOWN) {
+        send_header(404, "Not Found", HTML);
+        send_file(NOT_FOUND_FILE);
+        return;
+    }
+
+    if (-1 == access(header.path, R_OK)) {
+        send_header(404, "Not Found", HTML);
+        send_file(NOT_FOUND_FILE);
+        return;
+    }
+
+    send_header(200, "OK", header.type);
+    send_file(header.path);
+    return;
 }

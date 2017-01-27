@@ -8,7 +8,7 @@
 int main() {
 
     close(0);
-    if (-1 == open("debug/get-request-illegal.txt", O_RDONLY))
+    if (-1 == open("debug/get-request-index.txt", O_RDONLY))
         return 1;
 
     handle_request();
