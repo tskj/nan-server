@@ -6,11 +6,13 @@
 #define GET_LENGTH 4
 #define PUT_LENGTH 4
 #define POST_LENGTH 5
+#define HEAD_LENGTH 5
 #define DELETE_LENGTH 7
 
 typedef enum { GET
              , PUT
              , POST
+             , HEAD
              , DELETE
              , ILLEGAL
              } request_t;
@@ -21,6 +23,8 @@ typedef enum { PLAIN
              , PNG
              , XML
              , XSL
+             , DTD
+             , JS
              , UNKNOWN
              , NONE
              } mime_t;
@@ -56,6 +60,10 @@ mime_t resolve_extension(char* filename) {
         return XML;
     if (!strcmp(filename + i, "xsl"))
         return XSL;
+    if (!strcmp(filename + i, "dtd"))
+        return DTD;
+    if (!strcmp(filename + i, "js"))
+        return JS;
  
     return UNKNOWN;
 }
@@ -130,6 +138,9 @@ header_t parse_request() {
     } else if (!strncmp(buffer, "POST ",   POST_LENGTH))   {
         header.request = POST;
         i = POST_LENGTH;
+    } else if (!strncmp(buffer, "HEAD ",   HEAD_LENGTH))   {
+        header.request = HEAD;
+        i = HEAD_LENGTH;
     } else if (!strncmp(buffer, "DELETE ", DELETE_LENGTH)) {
         header.request = DELETE;
         i = DELETE_LENGTH;
@@ -183,7 +194,12 @@ void send_header(int status_code, char* status, mime_t content_type) {
     fflush(stdout);
 }
 
-void send_file(const char* path) {
+void send_file(header_t header) {
+
+    if (header.request == HEAD)
+        return;
+
+    char* path = header.path;
 
     char* buffer[4096];
     int fd = open(path, O_RDONLY);
@@ -202,23 +218,32 @@ void handle_request() {
 
     header_t header = parse_request();
 
-    if (header.request == ILLEGAL) {
-        send_header(404, "Not Found", HTML);
-        send_file(NOT_FOUND_FILE);
+    if (pathIsMatch(header.path, API_PATH)) {
+        printf("API is comming...");
         return;
     }
-    
+
+    if (header.request == ILLEGAL) {
+        send_header(404, "Not Found", HTML);
+        header.path = NOT_FOUND_FILE;
+        send_file(header);
+        return;
+    }
+
     int i = 0;
     for (i = 0; i < sizeof(illegal_paths) / sizeof(illegal_paths[0]); i++) {
         if (pathIsMatch(header.path, illegal_paths[i])) {
             send_header(404, "Not Found", HTML);
-            send_file(NOT_FOUND_FILE);
+            header.path = NOT_FOUND_FILE;
+            send_file(header);
             return;
         }
     }
 
-    if (pathIsMatch(header.path, API_PATH)) {
-        printf("API is comming...");
+    if (header.type == NONE || header.type == UNKNOWN || (header.request != GET && header.request != HEAD)) {
+        send_header(404, "Not Found", HTML);
+        header.path = NOT_FOUND_FILE;
+        send_file(header);
         return;
     }
 
@@ -229,19 +254,15 @@ void handle_request() {
         header.type = HTML;
     }
 
-    if (header.type == NONE || header.type == UNKNOWN) {
-        send_header(404, "Not Found", HTML);
-        send_file(NOT_FOUND_FILE);
-        return;
-    }
-
     if (-1 == access(header.path, R_OK)) {
         send_header(404, "Not Found", HTML);
-        send_file(NOT_FOUND_FILE);
+        header.path = NOT_FOUND_FILE;
+        send_file(header);
         return;
     }
 
     send_header(200, "OK", header.type);
-    send_file(header.path);
+    send_file(header);
+
     return;
 }
