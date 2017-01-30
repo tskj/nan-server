@@ -78,23 +78,49 @@ header_t parse_request() {
 
     header_t header;
 
-    int header_size = 512;
+    int header_size = 25;
     char* buffer = malloc(header_size);
     int read_bytes = read(0, buffer, header_size);
 
-    while (header_size <= read_bytes) {
-        header_size *= 2;
-        char* new_buffer = malloc(header_size);
-        memcpy(new_buffer, buffer, header_size/2);
-        free(buffer);
-        buffer = new_buffer;
+    int consecutive_LFs = 0;
+    int i = 0;
 
-        read_bytes += read(0, buffer + header_size/2, header_size/2);
-    }
+    do {
+
+        while (i < read_bytes) {
+
+            if (buffer[i] == '\n')
+                consecutive_LFs++;
+            else if (buffer[i] == '\r' || buffer[i] == ' ')
+                consecutive_LFs = consecutive_LFs;
+            else
+                consecutive_LFs = 0;
+
+            i++;
+
+            if (consecutive_LFs == 2)
+                break;
+        }
+
+        if (consecutive_LFs != 2) {
+            read_bytes += read(0, buffer + i, header_size - read_bytes);
+        }
+
+        while (read_bytes == header_size) {
+            header_size *= 2;
+            char* new_buffer = malloc(header_size);
+            memcpy(new_buffer, buffer, header_size/2);
+            free(buffer);
+            buffer = new_buffer;
+
+            read_bytes += read(0, buffer + header_size/2, header_size/2);
+        }
+
+    } while (consecutive_LFs < 2);
     
     buffer[read_bytes] = '\0'; // Cannot possibly overflow due to while-loop
 
-    int i = 0;
+    i = 0;
     if        (!strncmp(buffer, "GET ",    GET_LENGTH))    {
         header.request = GET;
         i = GET_LENGTH;
@@ -122,28 +148,6 @@ header_t parse_request() {
     }
 
     buffer[i] = '\0';
-
-    int consecutive_LFs = 0;
-    while (i < read_bytes) {
-        if (buffer[i] == '\n') {
-            consecutive_LFs++;
-        } else if (buffer[i] == ' ' || buffer[i] == '\r') {
-            consecutive_LFs = consecutive_LFs; // noOp
-        } else {
-            consecutive_LFs = 0;
-        }
-
-        i++;
-
-        if (consecutive_LFs == 2) {
-            break;
-        }
-    }
-
-    if (consecutive_LFs != 2) {
-        header.request = ILLEGAL;
-        return header;
-    }
 
     header.body = buffer + i;
 
