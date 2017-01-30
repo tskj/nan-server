@@ -230,6 +230,13 @@ void handle_request() {
         return;
     }
 
+    if (header.type == UNKNOWN) {
+        send_header(404, "Not Found", HTML);
+        header.path = NOT_FOUND_FILE;
+        send_file(header);
+        return;
+    }
+
     int i = 0;
     for (i = 0; i < sizeof(illegal_paths) / sizeof(illegal_paths[0]); i++) {
         if (pathIsMatch(header.path, illegal_paths[i])) {
@@ -240,7 +247,7 @@ void handle_request() {
         }
     }
 
-    if (header.type == NONE || header.type == UNKNOWN || (header.request != GET && header.request != HEAD)) {
+    if (header.request != GET && header.request != HEAD) {
         send_header(404, "Not Found", HTML);
         header.path = NOT_FOUND_FILE;
         send_file(header);
