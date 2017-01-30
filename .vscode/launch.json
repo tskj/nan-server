@@ -7,15 +7,9 @@
         {
             "type": "cppdbg",
             "request": "launch",
-            "name": "Launch Program",
-            "program": "${workspaceRoot}/debug/unit_test",
+            "name": "Launch Tests",
+            "program": "${workspaceRoot}/tests/unit_test",
             "cwd": "${workspaceRoot}"
-        },
-        {
-            "type": "node",
-            "request": "attach",
-            "name": "Attach to Process",
-            "port": 5858
         }
     ]
 }

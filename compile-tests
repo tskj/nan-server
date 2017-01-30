@@ -1,3 +1,0 @@
-#!/bin/bash
-
-gcc -g -x c -o tests/unit_test tests/$1

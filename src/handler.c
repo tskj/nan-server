@@ -1,7 +1,7 @@
 #include <string.h>
 
-#define NOT_FOUND_FILE "/lib/not-found.html"
-#define API_PATH "/api"
+#define NOT_FOUND_FILE "lib/not-found.html"
+#define API_PATH "api"
 
 #define GET_LENGTH 4
 #define PUT_LENGTH 4
