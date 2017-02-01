@@ -1,15 +1,18 @@
-{
-    // Use IntelliSense to learn about possible Node.js debug attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "cppdbg",
-            "request": "launch",
-            "name": "Launch Tests",
-            "program": "${workspaceRoot}/tests/unit_test",
-            "cwd": "${workspaceRoot}"
-        }
-    ]
-}
+{   "version": "0.2.0"                                          
+,   "configurations": [                                         
+        {   "type": "cppdbg"                                    
+        ,   "request": "launch"                                 
+        ,   "name": "Launch Tests"                              
+        ,   "program": "${workspaceRoot}/tests/unit_test"       
+        ,   "cwd": "${workspaceRoot}"                           
+        }                                                       
+        ,                                                       
+        {   "type": "cppdbg"                                    
+        ,   "request": "launch"                                 
+        ,   "name": "XML Test"                                  
+        ,   "preLaunchTask": "${workspaceRoot}/compile-xml_test"
+        ,   "program": "${workspaceRoot}/tests/xml_test"        
+        ,   "cwd": "${workspaceRoot}"                           
+        }                                                       
+    ]                                                           
+}                                                               
