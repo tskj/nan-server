@@ -77,7 +77,7 @@ int main() {
     }
 
     int fd;
-    for (fd = 0; fd < _NFILE; fd++) {
+    for (fd = 0; fd < sysconf(_SC_OPEN_MAX); fd++) {
         close(fd);
     }
 
