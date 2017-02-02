@@ -173,11 +173,13 @@ attribute_t* get_attribute(char* xml, int* j) {
 
     at -> key = string_concat(NULL, xml, &xml[i]);
 
-    while (xml[i] != '"') i++;
+    while (xml[i] != '"' && xml[i] != '\'') i++;
+    char quote = xml[i];
+
     i++;
 
     int k = i;
-    while (xml[k] != '"') k++;
+    while (xml[k] != quote) k++;
 
     at -> value = string_concat(NULL, &xml[i], &xml[k]);
 
