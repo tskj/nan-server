@@ -73,12 +73,13 @@ int main() {
 
     if (-1 == chroot("/www")) {
         printf("Could not change root\n");
-//        exit(1);
+        exit(1);
     }
 
-    close(0);
-    close(1);
-    close(2);
+    int fd;
+    for (fd = 0; fd < _NFILE; fd++) {
+        close(fd);
+    }
 
     signal(SIGCHLD, SIG_IGN);
 
