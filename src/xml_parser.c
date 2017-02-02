@@ -36,9 +36,13 @@ int is_whitespace(char c) {
 char* string_concat(char* str, char* start, char* stop) {
     if (start > stop) return NULL;
 
+    int length = (int) ((long unsigned int) stop - (long unsigned int) start);
+
     int i = 0;
-    while (str[i]) i++;
-    char* string = malloc(i + stop - start + 1);
+    if (str) {
+        while (str[i]) i++;
+    }
+    char* string = malloc(i + length + 1);
 
     int j = 0;
     while (j < i) {
@@ -79,9 +83,10 @@ element_t* get_element(char* xml, int* last_index) {
     if (xml[0] != '<') {
         printf("Get element needs to start at opening tag\n");
         exit(1);
-    }
+    } printf("Finding new element\n");
 
     element_t* e = malloc(sizeof(element_t));
+    e -> text = NULL;
 
     int inside_tag = 1;
     attribute_t* at_p = NULL;
@@ -97,6 +102,7 @@ element_t* get_element(char* xml, int* last_index) {
             } else
 
             if (xml[i] == '<') {
+                i++;
                 e -> tag = get_tag(&xml[i], &i);
             } else
 
@@ -120,7 +126,7 @@ element_t* get_element(char* xml, int* last_index) {
             
             if (xml[i] == '<') {
                 if (xml[i+1] == '/') {
-                    j = i;
+                    j = 0;
                     while (e -> tag[j]) j++;
                     if (!strncmp(e -> tag, &xml[i+2], j)) {
                         i += j + 2;
@@ -140,6 +146,7 @@ element_t* get_element(char* xml, int* last_index) {
                 j = i;
                 while (xml[j] != '<') j++;
                 e -> text = string_concat(e -> text, &xml[i], &xml[j]);
+                i = j;
             }
         }
     }
@@ -151,9 +158,9 @@ char* get_tag(char* xml, int* j) {
 
     char* tag = malloc(i+1);
     memcpy(tag, xml, i);
-    tag[i] = 0;
+    tag[i] = '\0';
 
-    *j = i;
+    *j += i;
     return tag;
 }
 
@@ -174,6 +181,6 @@ attribute_t* get_attribute(char* xml, int* j) {
 
     at -> value = string_concat(NULL, &xml[i], &xml[k]);
 
-    *j = k + 1;
+    *j += k + 1;
     return at;
 }
