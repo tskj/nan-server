@@ -68,7 +68,7 @@ mime_t resolve_extension(char* filename) {
     return UNKNOWN;
 }
 
-int pathIsMatch(char* req, const char* pattern) {
+int path_is_match(char* req, const char* pattern) {
     int i = 0;
     while (1) {
         if (pattern[i] == 0)
@@ -218,7 +218,7 @@ void handle_request() {
 
     header_t header = parse_request();
 
-    if (pathIsMatch(header.path, API_PATH)) {
+    if (path_is_match(header.path, API_PATH)) {
         printf("API is comming...");
         return;
     }
@@ -239,7 +239,7 @@ void handle_request() {
 
     int i = 0;
     for (i = 0; i < sizeof(illegal_paths) / sizeof(illegal_paths[0]); i++) {
-        if (pathIsMatch(header.path, illegal_paths[i])) {
+        if (path_is_match(header.path, illegal_paths[i])) {
             send_header(404, "Not Found", HTML);
             header.path = NOT_FOUND_FILE;
             send_file(header);
