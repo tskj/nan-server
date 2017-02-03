@@ -185,7 +185,10 @@ void send_header(int status_code, char* status, mime_t content_type) {
                     break;
         case XSL:   printf("text/xsl; charset=utf-8\n");
                     break;
-        default:    printf("Shouldn't be called\n");
+        case JS:    printf("application/javascript; charset=utf-8\n");
+                    break;
+        case DTD:   printf("application/xml-dtd\n");
+                    break;
     }
 
     printf("Connection: close\n");

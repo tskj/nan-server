@@ -6,7 +6,7 @@
 #include <errno.h>
 #include <arpa/inet.h>
 
-#include "handler.c"
+#include "request_handler.c"
 
 #define LOCAL_PORT 80
 #define QUEUE 10
