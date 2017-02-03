@@ -1,19 +1,10 @@
 {   "version": "0.2.0"                                          
 ,   "configurations": [                                         
-        {   "type": "cppdbg"                                    
-        ,   "request": "launch"                                 
-        ,   "name": "Launch Tests"                              
-        ,   "preLaunchTask": "${workspaceRoot}/tests/compile-unit_test"
-        ,   "program": "${workspaceRoot}/tests/unit_test"
-        ,   "cwd": "${workspaceRoot}"                           
-        }                                                       
-        ,                                                       
         {   "type": "cppdbg"
         ,   "request": "launch"
         ,   "name": "XML Test"
-        ,   "preLaunchTask": "${workspaceRoot}/tests/compile-xml_test"
         ,   "program": "${workspaceRoot}/tests/xml_test.out"        
-        ,   "cwd": "${workspaceRoot}"
+        ,   "cwd": "${workspaceRoot}/tests"
         }                                                       
     ]                                                           
 }                                                               

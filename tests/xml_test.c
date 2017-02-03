@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
 
 #include "../src/xml_parser.c"
 
@@ -32,7 +34,6 @@ void print_e(element_t* xml, int tab_level) {
 
 int main() {
 
-    close(0);
     int fd = open("example.xml", O_RDONLY);
 
     char buffer[4096];
