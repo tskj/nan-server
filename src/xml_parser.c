@@ -83,7 +83,7 @@ element_t* get_element(char* xml, int* last_index) {
     if (xml[0] != '<') {
         printf("Get element needs to start at opening tag\n");
         exit(1);
-    } printf("Finding new element\n");
+    }
 
     element_t* e = malloc(sizeof(element_t));
     e -> text = NULL;
@@ -129,7 +129,7 @@ element_t* get_element(char* xml, int* last_index) {
                     j = 0;
                     while (e -> tag[j]) j++;
                     if (!strncmp(e -> tag, &xml[i+2], j)) {
-                        i += j + 2;
+                        i += j + 3;
                         if (last_index) *last_index += i;
                         return e;
                     } else {
@@ -154,7 +154,7 @@ element_t* get_element(char* xml, int* last_index) {
 
 char* get_tag(char* xml, int* j) {
     int i = 0;
-    while (xml[i] != ' ' && xml[i] != '>') i++;
+    while (xml[i] != ' ' && xml[i] != '>' && xml[i] != '/') i++;
 
     char* tag = malloc(i+1);
     memcpy(tag, xml, i);

@@ -8,7 +8,7 @@
 
 void print_a(attribute_t* at) {
     if (!at) return;
-    printf("%s=\"%s\" ", at -> key, at -> value);
+    if (at->key && at->value) printf("%s=\"%s\" ", at -> key, at -> value);
     print_a(at -> sibling);
 }
 
@@ -19,12 +19,12 @@ void print_e(element_t* xml, int tab_level) {
     int i = 0;
     while (i++ < tab_level) printf("\t");
 
-    printf("%s: ", xml -> tag);
+    if (xml -> tag) printf("%s: ", xml -> tag);
     print_a(xml -> attributes);
     printf("\n");
     i = 0;
     while (i++ < tab_level+1) printf("\t");
-    printf("%s\n", xml -> text);
+    if (xml -> text) printf("%s\n", xml -> text);
     node_t* n = xml -> nodes;
     while (n) {
         print_e(n -> element, tab_level + 1);
