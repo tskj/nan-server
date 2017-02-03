@@ -28,7 +28,7 @@ void print_e(element_t* xml, int tab_level) {
     node_t* n = xml -> nodes;
     while (n) {
         print_e(n -> element, tab_level + 1);
-        n = xml -> nodes -> sibling;
+        n = n -> sibling;
     }
 }
 
