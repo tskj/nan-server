@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "/home/tarjei/DA-NAN/server/src/xml_parser.c"
+#include "src/xml_parser.c"
 
 void print_a(attribute_t* at) {
     if (!at) return;
