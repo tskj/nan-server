@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if gcc -g -x c -o unit_test.out unit_test.c; then
+	touch get-request-pipe.txt
+	rm get-request-pipe.txt
+	mkfifo get-request-pipe.txt
+fi

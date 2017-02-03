@@ -1,7 +1,0 @@
-#!/bin/bash
-
-if gcc -g -x c -o tests/unit_test tests/unit_test.c; then
-	touch tests/get-request-pipe.txt
-	rm tests/get-request-pipe.txt
-	mkfifo tests/get-request-pipe.txt
-fi
