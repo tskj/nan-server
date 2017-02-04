@@ -1,4 +1,5 @@
 #include <string.h>
+#include <errno.h>
 
 #define NOT_FOUND_FILE "/lib/not-found.html"
 #define API_PATH "/api"
@@ -36,7 +37,8 @@ typedef struct {
     char*      body;
 } header_t;
 
-const char const* illegal_paths[] = {   "/lib"
+const char const* illegal_paths[] = { "/bin"
+                                    , "/lib"
                                     };
 
 
@@ -223,7 +225,9 @@ void handle_request() {
     header_t header = parse_request();
 
     if (path_is_match(header.path, API_PATH)) {
-        printf("API is comming...");
+        send_header(200, "OK", PLAIN);
+        execl("/bin/cat", "cat", "example.json", NULL);
+        printf("%s\n", strerror(errno));
         return;
     }
 

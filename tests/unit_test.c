@@ -3,7 +3,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "../src/handler.c"
+#include "../src/request_handler.c"
 
 int unit_test_handler(char* file, char* request) {
 
@@ -30,15 +30,15 @@ int unit_test_handler(char* file, char* request) {
 
 int main() {
 
-    unit_test_handler("tests/get-request-index.txt", "GET /index.html");
-    unit_test_handler("tests/get-request-illegal.txt", "GET /lib");
-    unit_test_handler("tests/get-request.txt", "GET /not_found_file");
-    unit_test_handler("tests/get-request-pipe.txt", "GET User submitted content");
+    unit_test_handler("get-request-index.txt", "GET /index.html");
+    unit_test_handler("get-request-illegal.txt", "GET /lib");
+    unit_test_handler("get-request.txt", "GET /not_found_file");
+    unit_test_handler("get-request-pipe.txt", "GET User submitted content");
 
-    printf("/png == /png: %d\n", pathIsMatch("/png", "/png"));
-    printf("/png/ == /png: %d\n", pathIsMatch("/png/", "/png"));
-    printf("/png/dk == /png: %d\n", pathIsMatch("/png/dk", "/png"));
-    printf("/pngu != /png: %d\n", !pathIsMatch("/pngu", "/png"));
+    printf("/png == /png: %d\n", path_is_match("/png", "/png"));
+    printf("/png/ == /png: %d\n", path_is_match("/png/", "/png"));
+    printf("/png/dk == /png: %d\n", path_is_match("/png/dk", "/png"));
+    printf("/pngu != /png: %d\n", !path_is_match("/pngu", "/png"));
 
     return 0;
 }
