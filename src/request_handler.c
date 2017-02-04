@@ -189,6 +189,7 @@ void send_header(int status_code, char* status, mime_t content_type) {
                     break;
         case DTD:   printf("application/xml-dtd\n");
                     break;
+        default:    printf("UUh, unknown file, shouldn't have gotten here\n'");
     }
 
     printf("Connection: close\n");
