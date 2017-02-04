@@ -1,5 +1,6 @@
 #include "request_handler.h"
 #include "xml_parser.c"
+#include "xml_serializer.c"
 
 void addressbook_handler(header_t req) {
 
@@ -10,6 +11,7 @@ void addressbook_handler(header_t req) {
         printf("Failed to parse\n");
         exit(0);
     }
-    send_header(200, "OK", req.request, req.type);
-    printf("Rotnamn: %s\n", root -> nodes -> element -> text);
+    send_header(201, "Created", req.request, XML);
+    printf("%s\n", serialize_xml(root));
+    fflush(0);
 }

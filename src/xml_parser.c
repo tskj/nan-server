@@ -108,6 +108,7 @@ element_t* get_element(char* xml, int* last_index) {
                         if (last_index) *last_index += i;
                         return e;
                     } else {
+                        return NULL;
                         printf("Illegal overlap of tags\nOpen tag: %s\nUnexpected closing tag: %s\n", e->tag, string_concat(NULL, &xml[i+2], &xml[i+2+j]));
                         exit(2);
                     }
@@ -116,10 +117,12 @@ element_t* get_element(char* xml, int* last_index) {
                     e -> nodes = malloc(sizeof(node_t));
                     e -> nodes -> element = get_element(&xml[i], &i);
                     e -> nodes -> sibling = n_p;
+
+                    if (e -> nodes -> element == NULL) return NULL;
                 }
             } else {
                 j = i;
-                while (xml[j] != '<') j++;
+                while (xml[j] && xml[j] != '<') j++;
                 e -> text = string_concat(e -> text, &xml[i], &xml[j]);
                 i = j;
             }
