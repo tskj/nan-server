@@ -55,7 +55,7 @@ header_t parse_request() {
 
     header_t header;
 
-    int header_size = 25;
+    int header_size = 512;
     char* buffer = malloc(header_size);
     int read_bytes = read(0, buffer, header_size);
 
@@ -94,6 +94,8 @@ header_t parse_request() {
         }
 
     } while (consecutive_LFs < 2);
+
+    header.body = buffer + i;
     
     buffer[read_bytes] = '\0'; // Cannot possibly overflow due to while-loop
 
@@ -129,8 +131,6 @@ header_t parse_request() {
 
     buffer[i] = '\0';
 
-    header.body = buffer + i;
-
     header.type = resolve_extension(header.path);
 
     return header;
@@ -158,7 +158,7 @@ void send_header(int status_code, char* status, request_t req, mime_t content_ty
                     break;
         case DTD:   printf("application/xml-dtd\n");
                     break;
-        default:    printf("UUh, unknown file, shouldn't have gotten here\n'");
+        default:    printf("UUh, unknown file, shouldn't have gotten here\n");
     }
 
     printf("Connection: close\n");
@@ -191,15 +191,17 @@ void handle_request() {
     header_t header = parse_request();
 
     if (path_is_match(header.path, API_PATH)) {
-        int offset = strlen(API_PATH);
-        if (!strncmp(&header.path[offset]
+        int offset = strlen(API_PATH) + 1;
+        if (!strcmp(header.path, API_PATH)){
+            send_header(200, "OK", header.request, PLAIN);
+            printf("Det einaste implementerte APIet er: %s\n", ADDRESSBOOK_API);
+        }else if (!strncmp(&header.path[offset]
            , ADDRESSBOOK_API
            , strlen(ADDRESSBOOK_API))) {
-               // addressbook_handler(header);
-               exit(0);
+               addressbook_handler(header);
         } else {
             send_header(404, "Not found", header.request, PLAIN);
-            printf("API: \"%s\" does not exist\n", &header.path[offset]);
+            printf("API: \"%s\" finnest ikkje\n", &header.path[offset]);
         }
         return;
     }

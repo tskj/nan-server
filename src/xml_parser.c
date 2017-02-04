@@ -51,6 +51,7 @@ element_t* parse_xml(char* xml_string) {
             }
         }
     }
+    return NULL;
 }
 
 element_t* get_element(char* xml, int* last_index) {
@@ -65,7 +66,6 @@ element_t* get_element(char* xml, int* last_index) {
 
     int inside_tag = 1;
     attribute_t* at_p = NULL;
-    element_t* e_p = NULL;
     node_t* n_p = NULL;
 
     int j, i = 0;
@@ -125,6 +125,7 @@ element_t* get_element(char* xml, int* last_index) {
             }
         }
     }
+    return NULL;
 }
 
 char* get_tag(char* xml, int* j) {

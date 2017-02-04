@@ -3,7 +3,7 @@
 
 #define NOT_FOUND_FILE "/lib/not-found.html"
 #define API_PATH "/api"
-#define ADDRESSBOOK_API "/addressbook"
+#define ADDRESSBOOK_API "addressbook"
 
 #define GET_LENGTH 4
 #define PUT_LENGTH 4
@@ -37,5 +37,7 @@ typedef struct {
     mime_t     type;
     char*      body;
 } header_t;
+
+void send_header(int, char*, request_t, mime_t);
 
 #endif

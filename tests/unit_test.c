@@ -30,6 +30,7 @@ int unit_test_handler(char* file, char* request) {
 
 int main() {
 
+    unit_test_handler("post-api.txt", "POST /api/addressbook");
     unit_test_handler("get-request-index.txt", "GET /index.html");
     unit_test_handler("get-request-illegal.txt", "GET /lib");
     unit_test_handler("get-request.txt", "GET /not_found_file");
