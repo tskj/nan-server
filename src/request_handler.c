@@ -226,8 +226,6 @@ void handle_request() {
 
     if (path_is_match(header.path, API_PATH)) {
         send_header(200, "OK", PLAIN);
-        execl("/bin/cat", "cat", "example.json", NULL);
-        printf("%s\n", strerror(errno));
         return;
     }
 

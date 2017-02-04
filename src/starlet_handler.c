@@ -1,0 +1,30 @@
+#define MAX_XML_SIZE 8*4096
+#define DTD_FILE "addressbook.dtd"
+
+void xmlstarlet_server() {
+
+    if (-1 == setgid(666)) {
+        printf("Could not drop privileges\n");
+        exit(1);
+    }
+
+    if (-1 == setuid(666)) {
+        printf("Could not change user\n");
+        exit(1);
+    }
+
+    while(1) {
+
+        int req = open("bin/xmlvalreq", O_RDONLY);
+        int res = open("bin/xmlvalres", O_WRONLY);
+
+        int child = fork();
+        if (0 == child) {
+            execlp("xmlstarlet", "xmlstarlet", "val", "-d", DTD_FILE, "-", NULL);
+        } else {
+            close(req);
+            close(res);
+        }
+    }
+    exit(0);
+}

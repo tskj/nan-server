@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <arpa/inet.h>
 
+#include "starlet_handler.c"
 #include "request_handler.c"
 
 #define LOCAL_PORT 80
@@ -63,25 +64,26 @@ int main() {
 
     setsid();
     signal(SIGHUP, SIG_IGN);
+    signal(SIGCHLD, SIG_IGN);
 
     if (0 != fork()) exit(0);
-
-    if (-1 == chdir("/www")) {
-        printf("Could not change working directory\n");
-        exit(1);
-    }
-
-    if (-1 == chroot("/www")) {
-        printf("Could not change root\n");
-        exit(1);
-    }
 
     int fd;
     for (fd = 0; fd < sysconf(_SC_OPEN_MAX); fd++) {
         close(fd);
     }
 
-    signal(SIGCHLD, SIG_IGN);
+    if (-1 == chdir("/www")) {
+        printf("Could not change working directory\n");
+        exit(1);
+    }
+
+    if (0 == fork()) xmlstarlet_server();
+
+    if (-1 == chroot("/www")) {
+        printf("Could not change root\n");
+        exit(1);
+    }
 
     server();
 
