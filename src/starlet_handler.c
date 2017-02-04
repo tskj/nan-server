@@ -1,3 +1,5 @@
+#include <sys/wait.h>
+
 #define MAX_XML_SIZE 8*4096
 #define DTD_FILE "addressbook.dtd"
 
@@ -24,6 +26,8 @@ void xmlstarlet_server() {
         } else {
             close(req);
             close(res);
+
+            waitpid(child, 0, 0);
         }
     }
     exit(0);

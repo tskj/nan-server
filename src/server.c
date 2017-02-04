@@ -64,7 +64,6 @@ int main() {
 
     setsid();
     signal(SIGHUP, SIG_IGN);
-    signal(SIGCHLD, SIG_IGN);
 
     if (0 != fork()) exit(0);
 
@@ -84,6 +83,8 @@ int main() {
         printf("Could not change root\n");
         exit(1);
     }
+
+    signal(SIGCHLD, SIG_IGN);
 
     server();
 
