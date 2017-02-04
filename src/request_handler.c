@@ -1,41 +1,8 @@
 #include <string.h>
 #include <errno.h>
 
-#define NOT_FOUND_FILE "/lib/not-found.html"
-#define API_PATH "/api"
-
-#define GET_LENGTH 4
-#define PUT_LENGTH 4
-#define POST_LENGTH 5
-#define HEAD_LENGTH 5
-#define DELETE_LENGTH 7
-
-typedef enum { GET
-             , PUT
-             , POST
-             , HEAD
-             , DELETE
-             , ILLEGAL
-             } request_t;
-
-typedef enum { PLAIN
-             , HTML
-             , CSS
-             , PNG
-             , XML
-             , XSL
-             , DTD
-             , JS
-             , UNKNOWN
-             , NONE
-             } mime_t;
-
-typedef struct {
-    request_t  request;
-    char*      path;
-    mime_t     type;
-    char*      body;
-} header_t;
+#include "request_handler.h"
+#include "addressbook_handler.c"
 
 const char const* illegal_paths[] = { "/bin"
                                     , "/lib"
@@ -224,7 +191,16 @@ void handle_request() {
     header_t header = parse_request();
 
     if (path_is_match(header.path, API_PATH)) {
-        send_header(200, "OK", header.request, PLAIN);
+        int offset = strlen(API_PATH);
+        if (!strncmp(&header.path[offset]
+           , ADDRESSBOOK_API
+           , strlen(ADDRESSBOOK_API))) {
+               // addressbook_handler(header);
+               exit(0);
+        } else {
+            send_header(404, "Not found", header.request, PLAIN);
+            printf("API: \"%s\" does not exist\n", &header.path[offset]);
+        }
         return;
     }
 
