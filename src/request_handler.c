@@ -169,7 +169,7 @@ header_t parse_request() {
     return header;
 }
 
-void send_header(int status_code, char* status, mime_t content_type) {
+void send_header(int status_code, char* status, request_t req, mime_t content_type) {
 
     printf("HTTP/1.0 %d %s\n", status_code, status);
 
@@ -198,14 +198,13 @@ void send_header(int status_code, char* status, mime_t content_type) {
     printf("\n");
 
     fflush(stdout);
+
+    if (req == HEAD) {
+        exit(0);
+    }
 }
 
-void send_file(header_t header) {
-
-    if (header.request == HEAD)
-        return;
-
-    char* path = header.path;
+void send_file(char* path) {
 
     char* buffer[4096];
     int fd = open(path, O_RDONLY);
@@ -225,38 +224,38 @@ void handle_request() {
     header_t header = parse_request();
 
     if (path_is_match(header.path, API_PATH)) {
-        send_header(200, "OK", PLAIN);
+        send_header(200, "OK", header.request, PLAIN);
         return;
     }
 
     if (header.request == ILLEGAL) {
-        send_header(404, "Not Found", HTML);
+        send_header(404, "Not Found", header.request, HTML);
         header.path = NOT_FOUND_FILE;
-        send_file(header);
+        send_file(header.path);
         return;
     }
 
     if (header.type == UNKNOWN) {
-        send_header(404, "Not Found", HTML);
+        send_header(404, "Not Found", header.request, HTML);
         header.path = NOT_FOUND_FILE;
-        send_file(header);
+        send_file(header.path);
         return;
     }
 
     int i = 0;
     for (i = 0; i < sizeof(illegal_paths) / sizeof(illegal_paths[0]); i++) {
         if (path_is_match(header.path, illegal_paths[i])) {
-            send_header(404, "Not Found", HTML);
+            send_header(404, "Not Found", header.request, HTML);
             header.path = NOT_FOUND_FILE;
-            send_file(header);
+            send_file(header.path);
             return;
         }
     }
 
     if (header.request != GET && header.request != HEAD) {
-        send_header(404, "Not Found", HTML);
+        send_header(404, "Not Found", header.request, HTML);
         header.path = NOT_FOUND_FILE;
-        send_file(header);
+        send_file(header.path);
         return;
     }
 
@@ -268,14 +267,14 @@ void handle_request() {
     }
 
     if (-1 == access(header.path, R_OK)) {
-        send_header(404, "Not Found", HTML);
+        send_header(404, "Not Found", header.request, HTML);
         header.path = NOT_FOUND_FILE;
-        send_file(header);
+        send_file(header.path);
         return;
     }
 
-    send_header(200, "OK", header.type);
-    send_file(header);
+    send_header(200, "OK", header.request, header.type);
+    send_file(header.path);
 
     return;
 }
