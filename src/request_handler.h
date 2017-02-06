@@ -38,6 +38,19 @@ typedef struct {
     char*      body;
 } header_t;
 
+typedef enum { NOT_FOUND = 404
+             , OK = 200
+             , CREATED = 201
+             } status_code_t;
+
 void send_header(int, char*, request_t, mime_t);
+
+int string_status(status_code_t code) {
+    switch (code) {
+        case NOT_FOUND: return "Not Found";
+        case OK:        return "OK";
+        case CREATED:   return "Created";
+    }
+}
 
 #endif

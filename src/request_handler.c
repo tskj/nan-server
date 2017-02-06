@@ -136,9 +136,9 @@ header_t parse_request() {
     return header;
 }
 
-void send_header(int status_code, char* status, request_t req, mime_t content_type) {
+void send_header(status_code_t status_code, request_t req, mime_t content_type) {
 
-    printf("HTTP/1.0 %d %s\n", status_code, status);
+    printf("HTTP/1.0 %d %s\n", status_code, string_status(status_code));
 
     printf("Content-Type: ");
     switch (content_type) {
@@ -193,28 +193,28 @@ void handle_request() {
     if (path_is_match(header.path, API_PATH)) {
         int offset = strlen(API_PATH) + 1;
         if (!strcmp(header.path, API_PATH)){
-            send_header(200, "OK", header.request, PLAIN);
+            send_header(OK, header.request, PLAIN);
             printf("Det einaste implementerte APIet er: %s\n", ADDRESSBOOK_API);
         }else if (!strncmp(&header.path[offset]
            , ADDRESSBOOK_API
            , strlen(ADDRESSBOOK_API))) {
                addressbook_handler(header);
         } else {
-            send_header(404, "Not found", header.request, PLAIN);
+            send_header(NOT_FOUND, header.request, PLAIN);
             printf("API: \"%s\" finnest ikkje\n", &header.path[offset]);
         }
         return;
     }
 
     if (header.request == ILLEGAL) {
-        send_header(404, "Not Found", header.request, HTML);
+        send_header(NOT_FOUND, header.request, HTML);
         header.path = NOT_FOUND_FILE;
         send_file(header.path);
         return;
     }
 
     if (header.type == UNKNOWN) {
-        send_header(404, "Not Found", header.request, HTML);
+        send_header(NOT_FOUND, header.request, HTML);
         header.path = NOT_FOUND_FILE;
         send_file(header.path);
         return;
@@ -223,7 +223,7 @@ void handle_request() {
     int i = 0;
     for (i = 0; i < sizeof(illegal_paths) / sizeof(illegal_paths[0]); i++) {
         if (path_is_match(header.path, illegal_paths[i])) {
-            send_header(404, "Not Found", header.request, HTML);
+            send_header(NOT_FOUND, header.request, HTML);
             header.path = NOT_FOUND_FILE;
             send_file(header.path);
             return;
@@ -231,7 +231,7 @@ void handle_request() {
     }
 
     if (header.request != GET && header.request != HEAD) {
-        send_header(404, "Not Found", header.request, HTML);
+        send_header(NOT_FOUND, header.request, HTML);
         header.path = NOT_FOUND_FILE;
         send_file(header.path);
         return;
@@ -245,13 +245,13 @@ void handle_request() {
     }
 
     if (-1 == access(header.path, R_OK)) {
-        send_header(404, "Not Found", header.request, HTML);
+        send_header(NOT_FOUND, header.request, HTML);
         header.path = NOT_FOUND_FILE;
         send_file(header.path);
         return;
     }
 
-    send_header(200, "OK", header.request, header.type);
+    send_header(OK, header.request, header.type);
     send_file(header.path);
 
     return;
