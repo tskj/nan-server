@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if gcc --static -Wall -Werror -O3 -o web-server.d src/server.c; then
+if gcc -Wall -Werror -O3 -o web-server.d src/server.c -lsqlite3 -lpthread -ldl; then
 	sudo ./web-server.d
 	rm ./web-server.d
 fi

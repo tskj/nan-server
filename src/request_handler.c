@@ -158,7 +158,7 @@ void send_header(status_code_t status_code, request_t req, mime_t content_type) 
                     break;
         case DTD:   printf("application/xml-dtd\n");
                     break;
-        default:    printf("UUh, unknown file, shouldn't have gotten here\n");
+        default:    printf("text/plain; charset=utf-8\n");
     }
 
     printf("Connection: close\n");
@@ -195,10 +195,11 @@ void handle_request() {
         if (!strcmp(header.path, API_PATH)){
             send_header(OK, header.request, PLAIN);
             printf("Det einaste implementerte APIet er: %s\n", ADDRESSBOOK_API);
-        }else if (!strncmp(&header.path[offset]
-           , ADDRESSBOOK_API
-           , strlen(ADDRESSBOOK_API))) {
-               addressbook_handler(header);
+        }else if (!strncmp( header.path
+                          , ADDRESSBOOK_API
+                          , strlen(ADDRESSBOOK_API))) {
+
+                                addressbook_handler(header);
         } else {
             send_header(NOT_IMPLEMENTED, header.request, PLAIN);
             printf("API: \"%s\" finnest ikkje\n", &header.path[offset]);
