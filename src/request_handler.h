@@ -38,19 +38,27 @@ typedef struct {
     char*      body;
 } header_t;
 
-typedef enum { NOT_FOUND = 404
-             , OK = 200
-             , CREATED = 201
+typedef enum { OK                 = 200
+             , CREATED            = 201
+             , BAD_REQUEST        = 400
+             , NOT_FOUND          = 404
+             , METHOD_NOT_ALLOWED = 405
+             , NOT_IMPLEMENTED    = 501
              } status_code_t;
 
-void send_header(int, char*, request_t, mime_t);
+void send_header(status_code_t, request_t, mime_t);
 
-int string_status(status_code_t code) {
+char* string_status(status_code_t code) {
     switch (code) {
-        case NOT_FOUND: return "Not Found";
-        case OK:        return "OK";
-        case CREATED:   return "Created";
+        case OK:                 return "OK";
+        case CREATED:            return "Created";
+        case BAD_REQUEST:        return "Bad Request";
+        case NOT_FOUND:          return "Not Found";
+        case METHOD_NOT_ALLOWED: return "Method Not Allowed"
+        case NOT_IMPLEMENTED:    return "Not Implemented"
     }
+
+    return "Error, should never reach";
 }
 
 #endif

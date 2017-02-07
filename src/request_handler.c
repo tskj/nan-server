@@ -200,14 +200,14 @@ void handle_request() {
            , strlen(ADDRESSBOOK_API))) {
                addressbook_handler(header);
         } else {
-            send_header(NOT_FOUND, header.request, PLAIN);
+            send_header(NOT_IMPLEMENTED, header.request, PLAIN);
             printf("API: \"%s\" finnest ikkje\n", &header.path[offset]);
         }
         return;
     }
 
     if (header.request == ILLEGAL) {
-        send_header(NOT_FOUND, header.request, HTML);
+        send_header(BAD_REQUEST, header.request, HTML);
         header.path = NOT_FOUND_FILE;
         send_file(header.path);
         return;
@@ -231,7 +231,7 @@ void handle_request() {
     }
 
     if (header.request != GET && header.request != HEAD) {
-        send_header(NOT_FOUND, header.request, HTML);
+        send_header(METHOD_NOT_ALLOWED, header.request, HTML);
         header.path = NOT_FOUND_FILE;
         send_file(header.path);
         return;
