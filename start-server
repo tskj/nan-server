@@ -1,6 +1,8 @@
 #!/bin/bash
 
-if gcc -static -Warray-bounds -O3 -o web-server.d src/server.c -lpthread -ldl; then
+if gcc -static -Wall -Werror -c -O3 src/server.c; then
+	gcc -o web-server.d server.o src/sqlite3.o -lpthread -ldl
+	rm server.o
 	sudo ./web-server.d
 	rm ./web-server.d
 fi

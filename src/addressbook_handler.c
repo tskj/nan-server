@@ -1,9 +1,6 @@
 #include <stdlib.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warray-bounds"
-#include "sqlite3.c"
-#pragma GCC diagnostic pop
+#include "sqlite3.h"
 
 #include "request_handler.h"
 #include "xml_parser.c"
