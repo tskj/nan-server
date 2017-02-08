@@ -1,5 +1,9 @@
-#include <sqlite3.h>
 #include <stdlib.h>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#include "sqlite3.c"
+#pragma GCC diagnostic pop
 
 #include "request_handler.h"
 #include "xml_parser.c"
@@ -41,10 +45,10 @@ void handle_get_request(header_t req) {
 
     sqlite3_stmt* sql_statement;
     
-    int rc = sqlite3_open(DB_PATH, &db);
+    int rc = sqlite3_open("api/addressbook.db", &db);
 
     if (rc != SQLITE_OK) {
-        send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
+        send_header(NOT_IMPLEMENTED, req.request, req.type);
         exit(0);
     }
 
