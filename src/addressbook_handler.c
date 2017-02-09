@@ -7,6 +7,9 @@
 #include "xml_serializer.c"
 
 #define DB_PATH "/api/addressbook.db"
+#define VALREQ "/bin/xmlvalreq"
+#define VALRES "/bin/xmlvalres"
+
 #define BUFFER_SIZE 1024
 
 void handle_get_request(header_t req) {
@@ -65,7 +68,7 @@ void handle_get_request(header_t req) {
     sqlite3_bind_text(sql_statement, 1, id_to_get, -1, NULL);
 
     node_t* p;
-    while ((rc = sqlite3_step(sql_statement)) == SQLITE_ROW) {
+    while ((rc = sqlite3_step(sql_statement)) == SQLITE_ROW) { 
         p = NULL;
 
         element_t* contact = malloc(sizeof(element_t));
@@ -93,8 +96,12 @@ void handle_get_request(header_t req) {
         name -> attributes = NULL;
         name -> nodes = NULL;
         length = sqlite3_column_bytes(sql_statement, 1) + 1;
-        name -> text = malloc(length);
-        memcpy(name -> text, sqlite3_column_text(sql_statement, 1), length);
+        if (1 == length) {
+            name -> text = NULL;
+        } else {
+            name -> text = malloc(length);
+            memcpy(name -> text, sqlite3_column_text(sql_statement, 1), length);
+        }
 
         p = contact -> nodes;
 
@@ -149,7 +156,132 @@ void handle_post_request(header_t req) {
         exit(0);
     }
 
+    int validation_req = open(VALREQ, O_WRONLY | O_NONBLOCK);
+    if (-1 == validation_req) {
+        send_header(INTERNAL_SERVER_ERROR, req.request, PLAIN);
+        exit(0);
+    }
 
+    int i = 0;
+    while (req.body[i]) {
+        int written_bytes = write(validation_req, &req.body[i], 1);
+        if (1 != written_bytes) {
+            send_header(INTERNAL_SERVER_ERROR, req.request, PLAIN);
+            exit(0);
+        }
+        i++;
+    }
+    close(validation_req);
+
+    char* happy_response = "- - valid";
+
+    int validation_res = open(VALRES, O_RDONLY);
+    if (-1 == validation_res) {
+        send_header(INTERNAL_SERVER_ERROR, req.request, PLAIN);
+        exit(0);
+    }
+
+    char buffer[strlen(happy_response)];
+    int read_bytes = read(validation_res, buffer, sizeof(buffer));
+    if (-1 == read_bytes) {
+        send_header(INTERNAL_SERVER_ERROR, req.request, PLAIN);
+        exit(0);
+    }
+    close(validation_res);
+
+    if (strncmp(happy_response, buffer, sizeof(buffer))) {
+        send_header(BAD_REQUEST, req.request, req.type);
+        exit(0);
+    }
+
+    // -------------------------------------- //
+    // We now know we have received valid XML //
+    // data with a valid HTTP (POST) request. //
+    // -------------------------------------- //
+
+    element_t* contacts = parse_xml(req.body);
+    if (!contacts) {
+        send_header(INTERNAL_SERVER_ERROR, req.request, PLAIN);
+        exit(0);
+    }
+
+    node_t* contact = contacts -> nodes;
+    while (contact) {
+
+        sqlite3* db;
+        sqlite3_stmt* sql_statement;
+
+        int rc = sqlite3_open(DB_PATH, &db);
+
+        if (rc != SQLITE_OK) {
+            send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
+            exit(0);
+        }
+
+        char* SQL = "INSERT INTO Addressbook(ID, Name, Tlf) VALUES (?,?,?);";
+
+        rc = sqlite3_prepare_v2(db, SQL, -1, &sql_statement, NULL);
+
+        if (rc != SQLITE_OK) {
+            sqlite3_finalize(sql_statement);
+            sqlite3_close(db);
+            send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
+            exit(0);
+        }
+
+        char* invalid_char;
+        char* id_tag = find_text_by_tag(contact -> element, "id");
+        if (!id_tag) {
+            sqlite3_finalize(sql_statement);
+            sqlite3_close(db);
+            send_header(BAD_REQUEST, req.request, req.type);
+            exit(0);
+        }
+
+        int id = (int) strtol(id_tag, &invalid_char, 0);
+        if ('\0' != *invalid_char) {
+            sqlite3_finalize(sql_statement);
+            sqlite3_close(db);
+            send_header(BAD_REQUEST, req.request, req.type);
+            exit(0);
+        }
+
+        sqlite3_bind_int(sql_statement, 1, id);
+
+        sqlite3_bind_text(sql_statement, 2, find_text_by_tag(contact -> element, "name"), -1, NULL);
+
+        char* tlf = find_text_by_tag(contact -> element, "tlf");
+        if (!tlf) {
+            sqlite3_finalize(sql_statement);
+            sqlite3_close(db);
+            send_header(BAD_REQUEST, req.request, req.type);
+            exit(0);
+        }
+
+        sqlite3_bind_text(sql_statement, 3, tlf, -1, NULL);
+
+        rc = sqlite3_step(sql_statement);
+        if (rc == SQLITE_CONSTRAINT) {
+            sqlite3_finalize(sql_statement);
+            sqlite3_close(db);
+            send_header(BAD_REQUEST, req.request, req.type);
+            exit(0);
+        }
+
+        if (rc != SQLITE_DONE) {
+            sqlite3_finalize(sql_statement);
+            sqlite3_close(db);
+            send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
+            exit(0);
+        }
+
+        sqlite3_finalize(sql_statement);
+        sqlite3_close(db);
+
+        contact = contact -> sibling;
+    }
+
+    send_header(CREATED, req.request, req.type);
 }
 
 void addressbook_handler(header_t req) {

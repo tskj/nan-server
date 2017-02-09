@@ -108,7 +108,7 @@ char* serialized(element_t* root, char* xml, int* i, int size) {
     if (root -> text) {
         strncpy(&xml[*i], root -> text, strlen(root -> text));
         *i += strlen(root -> text);
-    } else {
+    } else if (root -> nodes) {
         spaces = 0;
         xml[*i] = '\n';
         (*i)++;
@@ -142,4 +142,19 @@ char* serialize_xml(element_t* root) {
     char* xml = serialized(root, 0, &i, 0);
     xml[i] = '\0';
     return xml;
+}
+
+char* find_text_by_tag(element_t* n, char* tag) {
+    if (!strcmp(n -> tag, tag)) {
+        return n -> text;
+    }
+
+    node_t* ns = n -> nodes;
+    while (ns) {
+        char* result = find_text_by_tag(ns -> element, tag);
+        if (result) return result;
+        ns = ns -> sibling;
+    }
+
+    return NULL;
 }

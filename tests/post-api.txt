@@ -1,5 +1,9 @@
 POST /api/addressbook HTTP/1.1
 
-<hei>
-<>	<padeig>verdiii</padeig>
-</hei>
+<contacts>
+	<contact>
+		<id>7</id>
+		<name/>
+		<tlf>1234</tlf>
+	</contact>
+</contacts>
