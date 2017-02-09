@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if gcc -g -x c -o unit_test.out unit_test.c -lsqlite3 -lpthread -ldl; then
+if gcc -g -x c -o unit_test.out unit_test.c ../src/sqlite3.c -lpthread -ldl; then
 	touch get-request-pipe.txt
 	rm get-request-pipe.txt
 	mkfifo get-request-pipe.txt

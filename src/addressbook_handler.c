@@ -42,10 +42,10 @@ void handle_get_request(header_t req) {
 
     sqlite3_stmt* sql_statement;
     
-    int rc = sqlite3_open("api/addressbook.db", &db);
+    int rc = sqlite3_open(DB_PATH, &db);
 
     if (rc != SQLITE_OK) {
-        send_header(NOT_IMPLEMENTED, req.request, req.type);
+        send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
         exit(0);
     }
 
