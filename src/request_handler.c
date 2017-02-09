@@ -190,6 +190,11 @@ void handle_request() {
 
     header_t header = parse_request();
 
+    if (header.request == ILLEGAL) {
+        send_header(BAD_REQUEST, header.request, HTML);
+        return;
+    }
+
     if (path_is_match(header.path, API_PATH)) {
         int offset = strlen(API_PATH) + 1;
         if (!strcmp(header.path, API_PATH)){
@@ -204,13 +209,6 @@ void handle_request() {
             send_header(NOT_IMPLEMENTED, header.request, PLAIN);
             printf("API: \"%s\" finnest ikkje\n", &header.path[offset]);
         }
-        return;
-    }
-
-    if (header.request == ILLEGAL) {
-        send_header(BAD_REQUEST, header.request, HTML);
-        header.path = NOT_FOUND_FILE;
-        send_file(header.path);
         return;
     }
 
