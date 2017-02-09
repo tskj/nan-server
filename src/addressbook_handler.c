@@ -16,9 +16,10 @@ void handle_get_request(header_t req) {
 
     char* start_of_id = &req.path[strlen(ADDRESSBOOK_API)];
     char* invalid_token;
+    if (*start_of_id == '/') start_of_id++;
     long int id = strtol(start_of_id, &invalid_token, 0);
 
-    if ('\0' == *start_of_id || 1 == strlen(start_of_id)) {
+    if ('\0' == *start_of_id) {
         id_to_get = "%";
     } else if ('\0' == *invalid_token) {
         int size = 128;
