@@ -134,7 +134,7 @@ void handle_get_request(header_t req) {
         exit(0);
     }
 
-    send_header(OK, req.request, req.type);
+    send_header(OK, req.request, XML);
     printf("%s", serialize_xml(contacts));
     fflush(stdout);
 }

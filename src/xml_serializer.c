@@ -1,5 +1,8 @@
 #include "xml_parser.h"
 
+int level = 0;
+int tab_size = 4;
+
 int isWhiteSpace(char c) {
     return c == ' ' || c == '\n' || c == '\r' || c == '\t';
 }
@@ -51,6 +54,8 @@ void print_attributes(attribute_t* a, char* xml, int* i) {
 
 char* serialized(element_t* root, char* xml, int* i, int size) {
 
+    int spaces;
+
     if (!xml) {
         size = 512;
         xml = malloc(size);
@@ -59,6 +64,18 @@ char* serialized(element_t* root, char* xml, int* i, int size) {
     if (*i >= size/2) {
         size *= 2;
         xml = realloc(xml, size);
+    }
+
+    spaces = 0;
+    if (level) {
+        xml[*i] = '\n';
+        (*i)++;
+    }
+    while (spaces < level * tab_size) {
+        xml[*i] = ' ';
+        (*i)++;
+
+        spaces++;
     }
 
     xml[*i] = '<';
@@ -74,6 +91,7 @@ char* serialized(element_t* root, char* xml, int* i, int size) {
     xml[*i] = '>';
     (*i)++;
 
+    level++;
     node_t* n = root -> nodes;
 
     while (n) {
@@ -85,9 +103,21 @@ char* serialized(element_t* root, char* xml, int* i, int size) {
         root -> text = trim(root -> text);
     }
 
+    level--;
+
     if (root -> text) {
         strncpy(&xml[*i], root -> text, strlen(root -> text));
         *i += strlen(root -> text);
+    } else {
+        spaces = 0;
+        xml[*i] = '\n';
+        (*i)++;
+        while (spaces < level * tab_size) {
+            xml[*i] = ' ';
+            (*i)++;
+
+            spaces++;
+        }
     }
 
     xml[*i] = '<';
