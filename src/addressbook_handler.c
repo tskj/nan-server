@@ -140,6 +140,18 @@ void handle_get_request(header_t req) {
     fflush(stdout);
 }
 
+void handle_post_request(header_t req) {
+
+    // Only want to accept
+    // /api/addressbook or /api/addressbook/
+    if (strlen(req.path) > strlen(ADDRESSBOOK_API) + 1) {
+        send_header(NOT_IMPLEMENTED, req.request, PLAIN);
+        exit(0);
+    }
+
+
+}
+
 void addressbook_handler(header_t req) {
 
     switch (req.request) {
@@ -148,8 +160,9 @@ void addressbook_handler(header_t req) {
                         break;
         case HEAD:      handle_get_request(req);
                         break;
-/*        case POST:      handle_post_request(req);
+        case POST:      handle_post_request(req);
                         break;
+                        /**
         case PUT:       handle_put_request(req);
                         break;
         case DELETE:    handle_delete_request(req);
