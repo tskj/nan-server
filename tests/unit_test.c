@@ -30,7 +30,6 @@ int unit_test_handler(char* file, char* request) {
 
 int main() {
 
-	unit_test_handler("get-invalid.txt", "GET / \\n");
 	unit_test_handler("get-api.txt", "GET /api/addressbook");
     unit_test_handler("post-api.txt", "POST /api/addressbook");
     unit_test_handler("get-request-index.txt", "GET /index.html");
