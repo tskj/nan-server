@@ -6,5 +6,12 @@
         ,   "program": "${workspaceRoot}/tests/unit_test.out"        
         ,   "cwd": "${workspaceRoot}/tests"
         }
+        ,
+        {   "type": "cppdbg"
+        ,   "request": "launch"
+        ,   "name": "XML Test"
+        ,   "program": "${workspaceRoot}/tests/xml_test.out"        
+        ,   "cwd": "${workspaceRoot}/tests"
+        }
     ]                                                           
 }                                                               
