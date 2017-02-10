@@ -143,6 +143,7 @@ void handle_get_request(header_t req) {
     }
 
     send_header(OK, req.request, XML);
+    printf("<!DOCTYPE %s SYSTEM \"addressbook.dtd\">\n", contacts -> tag);
     printf("%s", serialize_xml(contacts));
     fflush(stdout);
 }
