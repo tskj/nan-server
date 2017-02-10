@@ -1,0 +1,2 @@
+DELETE /api/addressbook/ HTTP/1.1
+

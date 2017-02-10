@@ -30,6 +30,7 @@ int unit_test_handler(char* file, char* request) {
 
 int main() {
 
+	unit_test_handler("delete-api.txt", "DELETE /api/addressbook");
 	unit_test_handler("put-api.txt", "PUT /api/addressbook");
 	unit_test_handler("get-api.txt", "GET /api/addressbook");
     unit_test_handler("post-api.txt", "POST /api/addressbook");

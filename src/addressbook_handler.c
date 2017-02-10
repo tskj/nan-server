@@ -25,7 +25,7 @@ void handle_get_request(header_t req) {
     if ('\0' == *start_of_id) {
         id_to_get = "%";
     } else if ('\0' == *invalid_token) {
-        int size = 128;
+        int size = BUFFER_SIZE;
         id_to_get = malloc(size);
         int bytes_written = snprintf(id_to_get, size, "%ld", id);
         if (bytes_written >= size || bytes_written <= 0) {
@@ -435,6 +435,68 @@ void handle_put_request(header_t req) {
     send_header(OK, req.request, req.type);
 }
 
+void handle_delete_request(header_t req) {
+
+    char* id_to_delete;
+
+    char* start_of_id = &req.path[strlen(ADDRESSBOOK_API)];
+    char* invalid_token;
+    if (*start_of_id == '/') start_of_id++;
+    long int id = strtol(start_of_id, &invalid_token, 0);
+
+    if ('\0' == *start_of_id) {
+        id_to_delete = NULL;
+    } else if ('\0' == *invalid_token) {
+        int size = BUFFER_SIZE;
+        id_to_delete = malloc(size);
+        int bytes_written = snprintf(id_to_delete, size, "%ld", id);
+        if (bytes_written >= size || bytes_written <= 0) {
+            send_header(BAD_REQUEST, req.request, req.type);
+            exit(0);
+        }
+    } else {
+        send_header(BAD_REQUEST, req.request, req.type);
+        exit(0);
+    }
+
+    sqlite3* db;
+
+    sqlite3_stmt* sql_statement;
+    
+    int rc = sqlite3_open(DB_PATH, &db);
+
+    if (rc != SQLITE_OK) {
+        send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
+        exit(0);
+    }
+
+    char* SQL = (id_to_delete == NULL) ? "DELETE FROM Addressbook;" : "DELETE FROM Addressbook WHERE ID LIKE ?;";
+
+    rc = sqlite3_prepare_v2(db, SQL, -1, &sql_statement, NULL);
+
+    if (rc != SQLITE_OK) {
+            sqlite3_close(db);
+            send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
+            exit(0);
+    }
+
+    if (id_to_delete) {
+        sqlite3_bind_text(sql_statement, 1, id_to_delete, -1, NULL);
+    }
+
+    rc = sqlite3_step(sql_statement);
+
+    sqlite3_finalize(sql_statement);
+    sqlite3_close(db);
+
+    if (rc != SQLITE_DONE) {
+        send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
+        exit(0);
+    }
+
+    send_header(OK, req.request, req.type);
+}
+
 void addressbook_handler(header_t req) {
 
     switch (req.request) {
@@ -447,12 +509,9 @@ void addressbook_handler(header_t req) {
                         break;
         case PUT:       handle_put_request(req);
                         break;
-                        /**
         case DELETE:    handle_delete_request(req);
                         break;
         case ILLEGAL:   send_header(METHOD_NOT_ALLOWED, req.request, req.type);
-                        exit(0);
-                        */
         default:        exit(0);
     }
 }
