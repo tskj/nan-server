@@ -1,0 +1,9 @@
+POST /api/addressbook HTTP/1.1
+
+<contacts>
+	<contact>
+		<id>2</id>
+		<name/>
+		<tlf>1234</tlf>
+	</contact>
+</contacts>

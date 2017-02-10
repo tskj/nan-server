@@ -1,0 +1,9 @@
+PUT /api/addressbook/2 HTTP/1.1
+
+<contacts>
+	<contact>
+		<id>2</id>
+		<name>hei</name>
+		<tlf>1234</tlf>
+	</contact>
+</contacts>

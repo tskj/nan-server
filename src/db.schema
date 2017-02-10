@@ -1,0 +1,5 @@
+CREATE TABLE Addressbook
+(   ID      INT PRIMARY KEY
+,   Name    TEXT
+,   Tlf     TEXT NOT NULL
+);
