@@ -52,18 +52,17 @@ void print_attributes(attribute_t* a, char* xml, int* i) {
     (*i)++;   
 }
 
-char* serialized(element_t* root, char* xml, int* i, int size) {
+char* serialized(element_t* root, char* xml, int* i, int* size) {
 
     int spaces;
 
     if (!xml) {
-        size = 512;
-        xml = malloc(size);
+        xml = malloc(*size);
     }
 
-    if (*i >= size/2) {
-        size *= 2;
-        xml = realloc(xml, size);
+    if (*i >= *size/2) {
+        *size *= 2;
+        xml = realloc(xml, *size);
     }
 
     spaces = 0;
@@ -71,6 +70,7 @@ char* serialized(element_t* root, char* xml, int* i, int size) {
         xml[*i] = '\n';
         (*i)++;
     }
+
     while (spaces < level * tab_size) {
         xml[*i] = ' ';
         (*i)++;
@@ -139,7 +139,8 @@ char* serialized(element_t* root, char* xml, int* i, int size) {
 
 char* serialize_xml(element_t* root) {
     int i = 0;
-    char* xml = serialized(root, 0, &i, 0);
+    int size = 512;
+    char* xml = serialized(root, 0, &i, &size);
     xml[i] = '\0';
     return xml;
 }
