@@ -1,6 +1,7 @@
 #ifndef REQUEST_HANDLER
 #define REQUEST_HANDLER
 
+#define DEFAULT_FILE "index.html"
 #define NOT_FOUND_FILE "/lib/not-found.html"
 #define API_PATH "/api"
 #define ADDRESSBOOK_API "/api/addressbook"
