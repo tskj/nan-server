@@ -206,33 +206,36 @@ void handle_post_request(header_t req) {
         exit(0);
     }
 
+    sqlite3* db;
+    sqlite3_stmt* sql_statement;
+
+    int rc = sqlite3_open(DB_PATH, &db);
+
+    if (rc != SQLITE_OK) {
+        send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
+        exit(0);
+    }
+
+    char* SQL = "INSERT INTO Addressbook(ID, Name, Tlf) VALUES (?,?,?);";
+
+    rc = sqlite3_prepare_v2(db, SQL, -1, &sql_statement, NULL);
+
+    if (rc != SQLITE_OK) {
+        sqlite3_finalize(sql_statement);
+        sqlite3_close(db);
+        send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
+        exit(0);
+    }
+
+    sqlite3_exec(db, "BEGIN TRANSACTION", 0, 0, 0);
+
     node_t* contact = contacts -> nodes;
     while (contact) {
-
-        sqlite3* db;
-        sqlite3_stmt* sql_statement;
-
-        int rc = sqlite3_open(DB_PATH, &db);
-
-        if (rc != SQLITE_OK) {
-            send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
-            exit(0);
-        }
-
-        char* SQL = "INSERT INTO Addressbook(ID, Name, Tlf) VALUES (?,?,?);";
-
-        rc = sqlite3_prepare_v2(db, SQL, -1, &sql_statement, NULL);
-
-        if (rc != SQLITE_OK) {
-            sqlite3_finalize(sql_statement);
-            sqlite3_close(db);
-            send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
-            exit(0);
-        }
 
         char* invalid_char;
         char* id_tag = find_text_by_tag(contact -> element, "id");
         if (!id_tag) {
+            sqlite3_exec(db, "ROLLBACK", 0, 0, 0);
             sqlite3_finalize(sql_statement);
             sqlite3_close(db);
             send_header(BAD_REQUEST, req.request, req.type);
@@ -241,6 +244,7 @@ void handle_post_request(header_t req) {
 
         int id = (int) strtol(id_tag, &invalid_char, 0);
         if ('\0' != *invalid_char) {
+            sqlite3_exec(db, "ROLLBACK", 0, 0, 0);
             sqlite3_finalize(sql_statement);
             sqlite3_close(db);
             send_header(BAD_REQUEST, req.request, req.type);
@@ -253,6 +257,7 @@ void handle_post_request(header_t req) {
 
         char* tlf = find_text_by_tag(contact -> element, "tlf");
         if (!tlf) {
+            sqlite3_exec(db, "ROLLBACK", 0, 0, 0);
             sqlite3_finalize(sql_statement);
             sqlite3_close(db);
             send_header(BAD_REQUEST, req.request, req.type);
@@ -263,6 +268,7 @@ void handle_post_request(header_t req) {
 
         rc = sqlite3_step(sql_statement);
         if (rc == SQLITE_CONSTRAINT) {
+            sqlite3_exec(db, "ROLLBACK", 0, 0, 0);
             sqlite3_finalize(sql_statement);
             sqlite3_close(db);
             send_header(BAD_REQUEST, req.request, req.type);
@@ -270,17 +276,21 @@ void handle_post_request(header_t req) {
         }
 
         if (rc != SQLITE_DONE) {
+            sqlite3_exec(db, "ROLLBACK", 0, 0, 0);
             sqlite3_finalize(sql_statement);
             sqlite3_close(db);
             send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
             exit(0);
         }
 
-        sqlite3_finalize(sql_statement);
-        sqlite3_close(db);
+        sqlite3_reset(sql_statement);
 
         contact = contact -> sibling;
     }
+
+    sqlite3_exec(db, "END TRANSACTION", 0, 0, 0);
+    sqlite3_finalize(sql_statement);
+    sqlite3_close(db);
 
     send_header(CREATED, req.request, req.type);
 }
