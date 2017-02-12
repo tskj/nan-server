@@ -9,6 +9,9 @@
 #include "starlet_handler.c"
 #include "request_handler.c"
 
+#define WEBROOT "/www"
+#define WEBUID 666
+
 #define LOCAL_PORT 80
 #define QUEUE 10
 
@@ -28,12 +31,12 @@ void server() {
         printf("Could not bind to part %d\n", LOCAL_PORT);
     }
 
-    if (-1 == setgid(666)) {
+    if (-1 == setgid(WEBUID)) {
         printf("Could not drop privileges\n");
         exit(1);
     }
 
-    if (-1 == setuid(666)) {
+    if (-1 == setuid(WEBUID)) {
         printf("Could not change user\n");
         exit(1);
     }
@@ -72,14 +75,14 @@ int main() {
         close(fd);
     }
 
-    if (-1 == chdir("/www")) {
+    if (-1 == chdir(WEBROOT)) {
         printf("Could not change working directory\n");
         exit(1);
     }
 
     if (0 == fork()) xmlstarlet_server();
 
-    if (-1 == chroot("/www")) {
+    if (-1 == chroot(WEBROOT)) {
         printf("Could not change root\n");
         exit(1);
     }
