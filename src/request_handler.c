@@ -235,21 +235,23 @@ void handle_request() {
 
     // Gonna have to serve a file...
 
-    struct stat s = {0};
-    if (!stat(header.path, &s)) {
-        if (S_ISDIR(s.st_mode)) {
-            int path_length = strlen(header.path);
-            char* fully_qualified_name = malloc(path_length + 1 + strlen(DEFAULT_FILE) + 1);
-            strncpy(fully_qualified_name, header.path, path_length);
-            fully_qualified_name[path_length] = '/';
-            strncpy(fully_qualified_name + path_length + 1, DEFAULT_FILE, strlen(DEFAULT_FILE));
-            fully_qualified_name[path_length + 1 + strlen(DEFAULT_FILE)] = '\0';
-            header.path = fully_qualified_name;
-            header.type = resolve_extension(header.path);
+    if (header.type == NONE && -1 != access(header.path, R_OK)) {
+        struct stat s = {0};
+        if (!stat(header.path, &s)) {
+            if (S_ISDIR(s.st_mode)) {
+                int path_length = strlen(header.path);
+                char* fully_qualified_name = malloc(path_length + 1 + strlen(DEFAULT_FILE) + 1);
+                strncpy(fully_qualified_name, header.path, path_length);
+                fully_qualified_name[path_length] = '/';
+                strncpy(fully_qualified_name + path_length + 1, DEFAULT_FILE, strlen(DEFAULT_FILE));
+                fully_qualified_name[path_length + 1 + strlen(DEFAULT_FILE)] = '\0';
+                header.path = fully_qualified_name;
+                header.type = resolve_extension(header.path);
+            }
+        } else {
+            send_header(INTERNAL_SERVER_ERROR, header.request, header.type);
+            exit(0);
         }
-    } else {
-        send_header(INTERNAL_SERVER_ERROR, header.request, header.type);
-        exit(0);
     }
 
     if (-1 == access(header.path, R_OK)) {
