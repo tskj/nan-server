@@ -142,23 +142,26 @@ void send_header(status_code_t status_code, request_t req, mime_t content_type) 
 
     printf("Content-Type: ");
     switch (content_type) {
-        case PLAIN: printf("text/plain; charset=utf-8\n");
-                    break;
-        case HTML:  printf("text/html; charset=utf-8\n");
-                    break;
-        case CSS:   printf("text/css; charset=utf-8\n");
-                    break;
-        case PNG:   printf("image/png\n");
-                    break;
-        case XML:   printf("application/xml; charset=utf-8\n");
-                    break;
-        case XSL:   printf("text/xsl; charset=utf-8\n");
-                    break;
-        case JS:    printf("application/javascript; charset=utf-8\n");
-                    break;
-        case DTD:   printf("application/xml-dtd\n");
-                    break;
-        default:    printf("text/plain; charset=utf-8\n");
+        case PLAIN:     printf("text/plain; charset=utf-8\n");
+                        break;
+        case HTML:      printf("text/html; charset=utf-8\n");
+                        break;
+        case CSS:       printf("text/css; charset=utf-8\n");
+                        break;
+        case PNG:       printf("image/png\n");
+                        break;
+        case XML:       printf("application/xml; charset=utf-8\n");
+                        break;
+        case XSL:       printf("text/xsl; charset=utf-8\n");
+                        break;
+        case JS:        printf("application/javascript; charset=utf-8\n");
+                        break;
+        case DTD:       printf("application/xml-dtd\n");
+                        break;
+        case NONE:      printf("text/plain; charset=utf-8\n");
+                        break;
+        case UNKNOWN:   printf("text/plain; charset=utf-8\n");
+                        break;
     }
 
     printf("Connection: close\n");
