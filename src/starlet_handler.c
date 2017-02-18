@@ -23,6 +23,7 @@ void xmlstarlet_server() {
         int child = fork();
         if (0 == child) {
             execlp("xmlstarlet", "xmlstarlet", "val", "-d", DTD_FILE, "-", NULL);
+            exit(0);
         } else {
             close(req);
             close(res);
