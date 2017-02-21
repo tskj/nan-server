@@ -29,11 +29,11 @@ void handle_get_request(header_t req) {
         id_to_get = malloc(size);
         int bytes_written = snprintf(id_to_get, size, "%ld", id);
         if (bytes_written >= size || bytes_written <= 0) {
-            send_header(BAD_REQUEST, req.request, req.type);
+            send_header(BAD_REQUEST, req);
             exit(0);
         }
     } else {
-        send_header(BAD_REQUEST, req.request, req.type);
+        send_header(BAD_REQUEST, req);
         exit(0);
     }
 
@@ -51,7 +51,7 @@ void handle_get_request(header_t req) {
     int rc = sqlite3_open(DB_PATH, &db);
 
     if (rc != SQLITE_OK) {
-        send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
+        send_header(INTERNAL_SERVER_ERROR, req);
         exit(0);
     }
 
@@ -61,7 +61,7 @@ void handle_get_request(header_t req) {
 
     if (rc != SQLITE_OK) {
             sqlite3_close(db);
-            send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
+            send_header(INTERNAL_SERVER_ERROR, req);
             exit(0);
     }
 
@@ -133,16 +133,17 @@ void handle_get_request(header_t req) {
     sqlite3_close(db);
 
     if (rc != SQLITE_DONE) {
-        send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
+        send_header(INTERNAL_SERVER_ERROR, req);
         exit(0);
     }
 
     if (NULL == contacts -> nodes) {
-        send_header(NO_CONTENT, req.request, req.type);
+        send_header(NO_CONTENT, req);
         exit(0);
     }
 
-    send_header(OK, req.request, XML);
+    req.type = XML;
+    send_header(OK, req);
     printf("<!DOCTYPE %s SYSTEM \"addressbook.dtd\">\n", contacts -> tag);
     printf("%s", serialize_xml(contacts));
     fflush(stdout);
@@ -153,13 +154,15 @@ void handle_post_request(header_t req) {
     // Only want to accept
     // /api/addressbook or /api/addressbook/
     if (strlen(req.path) > strlen(ADDRESSBOOK_API) + 1) {
-        send_header(NOT_IMPLEMENTED, req.request, PLAIN);
+        req.type = PLAIN;
+        send_header(NOT_IMPLEMENTED, req);
         exit(0);
     }
 
     int validation_req = open(VALREQ, O_WRONLY | O_NONBLOCK);
     if (-1 == validation_req) {
-        send_header(INTERNAL_SERVER_ERROR, req.request, PLAIN);
+        req.type = PLAIN;
+        send_header(INTERNAL_SERVER_ERROR, req);
         exit(0);
     }
 
@@ -167,7 +170,8 @@ void handle_post_request(header_t req) {
     while (req.body[i]) {
         int written_bytes = write(validation_req, &req.body[i], 1);
         if (1 != written_bytes) {
-            send_header(INTERNAL_SERVER_ERROR, req.request, PLAIN);
+            req.type = PLAIN;
+            send_header(INTERNAL_SERVER_ERROR, req);
             exit(0);
         }
         i++;
@@ -178,20 +182,22 @@ void handle_post_request(header_t req) {
 
     int validation_res = open(VALRES, O_RDONLY);
     if (-1 == validation_res) {
-        send_header(INTERNAL_SERVER_ERROR, req.request, PLAIN);
+        req.type = PLAIN;
+        send_header(INTERNAL_SERVER_ERROR, req);
         exit(0);
     }
 
     char buffer[strlen(happy_response)];
     int read_bytes = read(validation_res, buffer, sizeof(buffer));
     if (-1 == read_bytes) {
-        send_header(INTERNAL_SERVER_ERROR, req.request, PLAIN);
+        req.type = PLAIN;
+        send_header(INTERNAL_SERVER_ERROR, req);
         exit(0);
     }
     close(validation_res);
 
     if (strncmp(happy_response, buffer, sizeof(buffer))) {
-        send_header(BAD_REQUEST, req.request, req.type);
+        send_header(BAD_REQUEST, req);
         exit(0);
     }
 
@@ -202,7 +208,8 @@ void handle_post_request(header_t req) {
 
     element_t* contacts = parse_xml(req.body);
     if (!contacts) {
-        send_header(INTERNAL_SERVER_ERROR, req.request, PLAIN);
+        req.type = PLAIN;
+        send_header(INTERNAL_SERVER_ERROR, req);
         exit(0);
     }
 
@@ -212,7 +219,7 @@ void handle_post_request(header_t req) {
     int rc = sqlite3_open(DB_PATH, &db);
 
     if (rc != SQLITE_OK) {
-        send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
+        send_header(INTERNAL_SERVER_ERROR, req);
         exit(0);
     }
 
@@ -223,7 +230,7 @@ void handle_post_request(header_t req) {
     if (rc != SQLITE_OK) {
         sqlite3_finalize(sql_statement);
         sqlite3_close(db);
-        send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
+        send_header(INTERNAL_SERVER_ERROR, req);
         exit(0);
     }
 
@@ -238,7 +245,7 @@ void handle_post_request(header_t req) {
             sqlite3_exec(db, "ROLLBACK", 0, 0, 0);
             sqlite3_finalize(sql_statement);
             sqlite3_close(db);
-            send_header(BAD_REQUEST, req.request, req.type);
+            send_header(BAD_REQUEST, req);
             exit(0);
         }
 
@@ -247,7 +254,7 @@ void handle_post_request(header_t req) {
             sqlite3_exec(db, "ROLLBACK", 0, 0, 0);
             sqlite3_finalize(sql_statement);
             sqlite3_close(db);
-            send_header(BAD_REQUEST, req.request, req.type);
+            send_header(BAD_REQUEST, req);
             exit(0);
         }
 
@@ -260,7 +267,7 @@ void handle_post_request(header_t req) {
             sqlite3_exec(db, "ROLLBACK", 0, 0, 0);
             sqlite3_finalize(sql_statement);
             sqlite3_close(db);
-            send_header(BAD_REQUEST, req.request, req.type);
+            send_header(BAD_REQUEST, req);
             exit(0);
         }
 
@@ -271,7 +278,7 @@ void handle_post_request(header_t req) {
             sqlite3_exec(db, "ROLLBACK", 0, 0, 0);
             sqlite3_finalize(sql_statement);
             sqlite3_close(db);
-            send_header(BAD_REQUEST, req.request, req.type);
+            send_header(BAD_REQUEST, req);
             exit(0);
         }
 
@@ -279,7 +286,7 @@ void handle_post_request(header_t req) {
             sqlite3_exec(db, "ROLLBACK", 0, 0, 0);
             sqlite3_finalize(sql_statement);
             sqlite3_close(db);
-            send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
+            send_header(INTERNAL_SERVER_ERROR, req);
             exit(0);
         }
 
@@ -292,7 +299,7 @@ void handle_post_request(header_t req) {
     sqlite3_finalize(sql_statement);
     sqlite3_close(db);
 
-    send_header(CREATED, req.request, req.type);
+    send_header(CREATED, req);
 }
 
 void handle_put_request(header_t req) {
@@ -300,7 +307,7 @@ void handle_put_request(header_t req) {
     char* invalid_token;
     char* start_of_id = &req.path[strlen(ADDRESSBOOK_API)];
     if (*start_of_id != '/') {
-        send_header(BAD_REQUEST, req.request, req.type);
+        send_header(BAD_REQUEST, req);
         exit(0);
     }
 
@@ -309,16 +316,17 @@ void handle_put_request(header_t req) {
     int id_to_update = (int) strtol(start_of_id, &invalid_token, 0);
 
     if ('\0' == *start_of_id) {
-        send_header(BAD_REQUEST, req.request, req.type);
+        send_header(BAD_REQUEST, req);
         exit(0);
     } else if ('\0' != *invalid_token) {
-        send_header(BAD_REQUEST, req.request, req.type);
+        send_header(BAD_REQUEST, req);
         exit(0);
     }
 
     int validation_req = open(VALREQ, O_WRONLY | O_NONBLOCK);
     if (-1 == validation_req) {
-        send_header(INTERNAL_SERVER_ERROR, req.request, PLAIN);
+        req.type = PLAIN;
+        send_header(BAD_REQUEST, req);
         exit(0);
     }
 
@@ -326,7 +334,8 @@ void handle_put_request(header_t req) {
     while (req.body[i]) {
         int written_bytes = write(validation_req, &req.body[i], 1);
         if (1 != written_bytes) {
-            send_header(INTERNAL_SERVER_ERROR, req.request, PLAIN);
+            req.type = PLAIN;
+            send_header(INTERNAL_SERVER_ERROR, req);
             exit(0);
         }
         i++;
@@ -337,26 +346,29 @@ void handle_put_request(header_t req) {
 
     int validation_res = open(VALRES, O_RDONLY);
     if (-1 == validation_res) {
-        send_header(INTERNAL_SERVER_ERROR, req.request, PLAIN);
+        req.type = PLAIN;
+        send_header(INTERNAL_SERVER_ERROR, req);
         exit(0);
     }
 
     char buffer[strlen(happy_response)];
     int read_bytes = read(validation_res, buffer, sizeof(buffer));
     if (-1 == read_bytes) {
-        send_header(INTERNAL_SERVER_ERROR, req.request, PLAIN);
+        req.type = PLAIN;
+        send_header(INTERNAL_SERVER_ERROR, req);
         exit(0);
     }
     close(validation_res);
 
     if (strncmp(happy_response, buffer, sizeof(buffer))) {
-        send_header(BAD_REQUEST, req.request, req.type);
+        send_header(BAD_REQUEST, req);
         exit(0);
     }
 
     element_t* contacts = parse_xml(req.body);
     if (!contacts) {
-        send_header(INTERNAL_SERVER_ERROR, req.request, PLAIN);
+        req.type = PLAIN;
+        send_header(INTERNAL_SERVER_ERROR, req);
         exit(0);
     }
 
@@ -364,7 +376,8 @@ void handle_put_request(header_t req) {
 
     // Make sure there is only one node to be updated
     if (contacts -> nodes -> sibling != NULL) {
-        send_header(BAD_REQUEST, req.request, PLAIN);
+        req.type = PLAIN;
+        send_header(BAD_REQUEST, req);
         exit(0);
     }
 
@@ -374,7 +387,7 @@ void handle_put_request(header_t req) {
     int rc = sqlite3_open(DB_PATH, &db);
 
     if (rc != SQLITE_OK) {
-        send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
+        send_header(INTERNAL_SERVER_ERROR, req);
         exit(0);
     }
 
@@ -385,7 +398,7 @@ void handle_put_request(header_t req) {
     if (rc != SQLITE_OK) {
         sqlite3_finalize(sql_statement);
         sqlite3_close(db);
-        send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
+        send_header(INTERNAL_SERVER_ERROR, req);
         exit(0);
     }
 
@@ -394,7 +407,7 @@ void handle_put_request(header_t req) {
     if (!id_tag) {
         sqlite3_finalize(sql_statement);
         sqlite3_close(db);
-        send_header(BAD_REQUEST, req.request, req.type);
+        send_header(BAD_REQUEST, req);
         exit(0);
     }
 
@@ -402,7 +415,7 @@ void handle_put_request(header_t req) {
     if ('\0' != *invalid_char) {
         sqlite3_finalize(sql_statement);
         sqlite3_close(db);
-        send_header(BAD_REQUEST, req.request, req.type);
+        send_header(BAD_REQUEST, req);
         exit(0);
     }
 
@@ -414,7 +427,7 @@ void handle_put_request(header_t req) {
     if (!tlf) {
         sqlite3_finalize(sql_statement);
         sqlite3_close(db);
-        send_header(BAD_REQUEST, req.request, req.type);
+        send_header(BAD_REQUEST, req);
         exit(0);
     }
 
@@ -429,21 +442,21 @@ void handle_put_request(header_t req) {
         sqlite3_finalize(sql_statement);
         sqlite3_close(db);
 
-        send_header(BAD_REQUEST, req.request, req.type);
+        send_header(BAD_REQUEST, req);
         exit(0);
     }
 
     if (rc != SQLITE_DONE) {
         sqlite3_finalize(sql_statement);
         sqlite3_close(db);
-        send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
+        send_header(INTERNAL_SERVER_ERROR, req);
         exit(0);
     }
 
     sqlite3_finalize(sql_statement);
     sqlite3_close(db);
 
-    send_header(OK, req.request, req.type);
+    send_header(OK, req);
 }
 
 void handle_delete_request(header_t req) {
@@ -462,11 +475,11 @@ void handle_delete_request(header_t req) {
         id_to_delete = malloc(size);
         int bytes_written = snprintf(id_to_delete, size, "%ld", id);
         if (bytes_written >= size || bytes_written <= 0) {
-            send_header(BAD_REQUEST, req.request, req.type);
+            send_header(BAD_REQUEST, req);
             exit(0);
         }
     } else {
-        send_header(BAD_REQUEST, req.request, req.type);
+        send_header(BAD_REQUEST, req);
         exit(0);
     }
 
@@ -477,7 +490,7 @@ void handle_delete_request(header_t req) {
     int rc = sqlite3_open(DB_PATH, &db);
 
     if (rc != SQLITE_OK) {
-        send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
+        send_header(BAD_REQUEST, req);
         exit(0);
     }
 
@@ -487,7 +500,7 @@ void handle_delete_request(header_t req) {
 
     if (rc != SQLITE_OK) {
             sqlite3_close(db);
-            send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
+            send_header(BAD_REQUEST, req);
             exit(0);
     }
 
@@ -501,11 +514,11 @@ void handle_delete_request(header_t req) {
     sqlite3_close(db);
 
     if (rc != SQLITE_DONE) {
-        send_header(INTERNAL_SERVER_ERROR, req.request, req.type);
+        send_header(INTERNAL_SERVER_ERROR, req);
         exit(0);
     }
 
-    send_header(OK, req.request, req.type);
+    send_header(OK, req);
 }
 
 void addressbook_handler(header_t req) {
@@ -522,7 +535,7 @@ void addressbook_handler(header_t req) {
                         break;
         case DELETE:    handle_delete_request(req);
                         break;
-        case ILLEGAL:   send_header(METHOD_NOT_ALLOWED, req.request, req.type);
+        case ILLEGAL:   send_header(METHOD_NOT_ALLOWED, req);
         default:        exit(0);
     }
 }
