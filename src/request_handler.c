@@ -58,6 +58,7 @@ header_t parse_request() {
     int header_size = 512;
     char* buffer = malloc(header_size);
     int read_bytes = read(0, buffer, header_size);
+    int diff_bytes = 0;
 
     int consecutive_LFs = 0;
     int i = 0;
@@ -80,7 +81,12 @@ header_t parse_request() {
         }
 
         if (consecutive_LFs != 2) {
+            diff_bytes = read_bytes;
             read_bytes += read(0, buffer + i, header_size - read_bytes);
+            if (read_bytes <= diff_bytes) {
+                // Connection closed prematurely
+                exit(0);
+            }
         }
 
         while (read_bytes == header_size) {
@@ -90,7 +96,12 @@ header_t parse_request() {
             free(buffer);
             buffer = new_buffer;
 
+            diff_bytes = read_bytes;
             read_bytes += read(0, buffer + header_size/2, header_size/2);
+            if (read_bytes <= diff_bytes) {
+                // Connection closed prematurely
+                exit(0);
+            }
         }
 
     } while (consecutive_LFs < 2);
