@@ -36,12 +36,14 @@ typedef struct {
     request_t  request;
     char*      path;
     mime_t     type;
+    char*      host;
     char*      body;
 } header_t;
 
 typedef enum { OK                    = 200
              , CREATED               = 201
              , NO_CONTENT            = 204
+             , SEE_OTHER             = 303
              , BAD_REQUEST           = 400
              , NOT_FOUND             = 404
              , METHOD_NOT_ALLOWED    = 405
@@ -49,13 +51,15 @@ typedef enum { OK                    = 200
              , NOT_IMPLEMENTED       = 501
              } status_code_t;
 
-void send_header(status_code_t, request_t, mime_t);
+void send_header(status_code_t, header_t);
 
 char* string_status(status_code_t code) {
+
     switch (code) {
         case OK:                    return "OK";
         case CREATED:               return "Created";
         case NO_CONTENT:            return "No Content";
+        case SEE_OTHER:             return "See Other";
         case BAD_REQUEST:           return "Bad Request";
         case NOT_FOUND:             return "Not Found";
         case METHOD_NOT_ALLOWED:    return "Method Not Allowed";

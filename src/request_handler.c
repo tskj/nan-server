@@ -58,6 +58,7 @@ header_t parse_request() {
     int header_size = 512;
     char* buffer = malloc(header_size);
     int read_bytes = read(0, buffer, header_size);
+    int diff_bytes = 0;
 
     int consecutive_LFs = 0;
     int i = 0;
@@ -80,7 +81,12 @@ header_t parse_request() {
         }
 
         if (consecutive_LFs != 2) {
+            diff_bytes = read_bytes;
             read_bytes += read(0, buffer + i, header_size - read_bytes);
+            if (read_bytes <= diff_bytes) {
+                // Connection closed prematurely
+                exit(0);
+            }
         }
 
         while (read_bytes == header_size) {
@@ -90,7 +96,12 @@ header_t parse_request() {
             free(buffer);
             buffer = new_buffer;
 
+            diff_bytes = read_bytes;
             read_bytes += read(0, buffer + header_size/2, header_size/2);
+            if (read_bytes <= diff_bytes) {
+                // Connection closed prematurely
+                exit(0);
+            }
         }
 
     } while (consecutive_LFs < 2);
@@ -132,16 +143,40 @@ header_t parse_request() {
     buffer[i] = '\0';
 
     header.type = resolve_extension(header.path);
+    header.host = NULL;
+
+    i++;
+    while (i < read_bytes) {
+
+        if (buffer[i] == 'H' && !strncmp("Host: ", &buffer[i], strlen("Host: "))) {
+            header.host = &buffer[i + strlen("Host: ")];
+            i += strlen("Host: ");
+            while (i < read_bytes) {
+                if (is_whitespace(buffer[i])) {
+                    buffer[i] = '\0';
+                    break;
+                }
+                i++;
+            }
+            break;
+        }
+
+        i++;
+    }
 
     return header;
 }
 
-void send_header(status_code_t status_code, request_t req, mime_t content_type) {
+void send_header(status_code_t status_code, header_t h) {
 
     printf("HTTP/1.0 %d %s\n", status_code, string_status(status_code));
 
+    if (status_code == SEE_OTHER) {
+        printf("Location: http://%s%s\n", h.host, h.path);
+    }
+
     printf("Content-Type: ");
-    switch (content_type) {
+    switch (h.type) {
         case PLAIN:     printf("text/plain; charset=utf-8\n");
                         break;
         case HTML:      printf("text/html; charset=utf-8\n");
@@ -169,7 +204,7 @@ void send_header(status_code_t status_code, request_t req, mime_t content_type) 
 
     fflush(stdout);
 
-    if (req == HEAD) {
+    if (h.request == HEAD) {
         exit(0);
     }
 }
@@ -194,26 +229,30 @@ void handle_request() {
     header_t header = parse_request();
 
     if (header.request == ILLEGAL) {
-        send_header(BAD_REQUEST, header.request, HTML);
+        header.type = HTML;
+        send_header(BAD_REQUEST, header);
         return;
     }
 
     if (path_is_match(header.path, API_PATH)) {
         int offset = strlen(API_PATH) + 1;
         if (!strcmp(header.path, API_PATH)){
-            send_header(OK, header.request, PLAIN);
+            header.type = PLAIN;
+            send_header(OK, header);
             printf("Det einaste implementerte APIet er: %s\n", ADDRESSBOOK_API);
         }else if (path_is_match(header.path, ADDRESSBOOK_API)) {
             addressbook_handler(header);
         } else {
-            send_header(NOT_IMPLEMENTED, header.request, PLAIN);
+            header.type = PLAIN;
+            send_header(NOT_IMPLEMENTED, header);
             printf("API: \"%s\" finnest ikkje\n", &header.path[offset]);
         }
         return;
     }
 
     if (header.type == UNKNOWN) {
-        send_header(NOT_FOUND, header.request, HTML);
+        header.type = HTML;
+        send_header(NOT_FOUND, header);
         header.path = NOT_FOUND_FILE;
         send_file(header.path);
         return;
@@ -222,7 +261,8 @@ void handle_request() {
     int i = 0;
     for (i = 0; i < sizeof(illegal_paths) / sizeof(illegal_paths[0]); i++) {
         if (path_is_match(header.path, illegal_paths[i])) {
-            send_header(NOT_FOUND, header.request, HTML);
+            header.type = HTML;
+            send_header(NOT_FOUND, header);
             header.path = NOT_FOUND_FILE;
             send_file(header.path);
             return;
@@ -230,7 +270,8 @@ void handle_request() {
     }
 
     if (header.request != GET && header.request != HEAD) {
-        send_header(METHOD_NOT_ALLOWED, header.request, HTML);
+        header.type = HTML;
+        send_header(METHOD_NOT_ALLOWED, header);
         header.path = NOT_FOUND_FILE;
         send_file(header.path);
         return;
@@ -245,26 +286,34 @@ void handle_request() {
                 int path_length = strlen(header.path);
                 char* fully_qualified_name = malloc(path_length + 1 + strlen(DEFAULT_FILE) + 1);
                 strncpy(fully_qualified_name, header.path, path_length);
-                fully_qualified_name[path_length] = '/';
-                strncpy(fully_qualified_name + path_length + 1, DEFAULT_FILE, strlen(DEFAULT_FILE));
-                fully_qualified_name[path_length + 1 + strlen(DEFAULT_FILE)] = '\0';
+                int added_slash = 0;
+                if (fully_qualified_name[path_length-1] != '/') {
+                    fully_qualified_name[path_length] = '/';
+                    added_slash = 1;
+                }
+                strncpy(fully_qualified_name + path_length + added_slash, DEFAULT_FILE, strlen(DEFAULT_FILE));
+                fully_qualified_name[path_length + added_slash + strlen(DEFAULT_FILE)] = '\0';
                 header.path = fully_qualified_name;
                 header.type = resolve_extension(header.path);
+
+                send_header(SEE_OTHER, header);
+                exit(0);
             }
         } else {
-            send_header(INTERNAL_SERVER_ERROR, header.request, header.type);
+            send_header(INTERNAL_SERVER_ERROR, header);
             exit(0);
         }
     }
 
     if (-1 == access(header.path, R_OK)) {
-        send_header(NOT_FOUND, header.request, HTML);
+        header.type = HTML;
+        send_header(NOT_FOUND, header);
         header.path = NOT_FOUND_FILE;
         send_file(header.path);
         return;
     }
 
-    send_header(OK, header.request, header.type);
+    send_header(OK, header);
     send_file(header.path);
 
     return;
