@@ -287,12 +287,15 @@ void handle_post_request(header_t req) {
 
         contact = contact -> sibling;
     }
+    
+    int changes = sqlite3_changes(db);
 
     sqlite3_exec(db, "END TRANSACTION", 0, 0, 0);
     sqlite3_finalize(sql_statement);
     sqlite3_close(db);
 
     send_header(CREATED, req.request, req.type);
+    printf("%d", changes);
 }
 
 void handle_put_request(header_t req) {
@@ -429,7 +432,7 @@ void handle_put_request(header_t req) {
         sqlite3_finalize(sql_statement);
         sqlite3_close(db);
 
-        send_header(BAD_REQUEST, req.request, req.type);
+        send_header(NOT_FOUND, req.request, req.type);
         exit(0);
     }
 
@@ -497,6 +500,8 @@ void handle_delete_request(header_t req) {
 
     rc = sqlite3_step(sql_statement);
 
+    int changes = sqlite3_changes(db);
+
     sqlite3_finalize(sql_statement);
     sqlite3_close(db);
 
@@ -505,7 +510,12 @@ void handle_delete_request(header_t req) {
         exit(0);
     }
 
-    send_header(OK, req.request, req.type);
+    if (changes < 1) {
+        send_header(NOT_FOUND, req.request, req.type);
+    } else {
+        send_header(OK, req.request, req.type);
+        printf("%d", changes)
+    }
 }
 
 void addressbook_handler(header_t req) {
