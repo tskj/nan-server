@@ -278,7 +278,7 @@ void handle_post_request(header_t req) {
             sqlite3_exec(db, "ROLLBACK", 0, 0, 0);
             sqlite3_finalize(sql_statement);
             sqlite3_close(db);
-            send_header(BAD_REQUEST, req);
+            send_header(METHOD_NOT_ALLOWED, req);
             exit(0);
         }
 
