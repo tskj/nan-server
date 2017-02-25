@@ -1,33 +1,41 @@
-GET
-====
+Legend
+======
 
-* Bad Request (orange)
-* Internal Server Error (red)
-* No Content (orange) -- Couldn't find anything
-* OK (not displayed) -- Show results
+; betyr implementert
+
+
+GET
+----
+
+* Bad Request (orange);
+* Internal Server Error (red);
+* No Content (orange) -- Couldn't find anything;
+* OK (not displayed) -- Show results;
 
 
 POST
-====
+----
 
 * Not Implemented (orange)
-* Internal Server Error (red)
-* Bad Request (orange)
-* Created (green)
+* Internal Server Error (red);
+* Bad Request (orange);
+* Method Not Allowed (orange);
+* Created (green);
 
 
 PUT
-====
+----
 
-* Bad Request (orange)
-* Internal Server Error (red)
-* Not Found (orange) -- No content with ID
+* Bad Request (orange);
+* Internal Server Error (red);
+* Not Found (orange) -- No content with ID;
+* OK;
 
 
 DELETE
-======
+------
 
-* Bad Request (orange)
-* Internal Server Erroer (red)
-* Not Found (orange) -- No content with ID
-* OK
+* Bad Request (orange);
+* Internal Server Error (red);
+* Not Found (orange) -- No content with ID;
+* OK;
