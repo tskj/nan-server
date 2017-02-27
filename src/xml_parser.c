@@ -63,6 +63,7 @@ element_t* get_element(char* xml, int* last_index) {
 
     element_t* e = malloc(sizeof(element_t));
     e -> text = NULL;
+    e -> nodes = NULL;
 
     int inside_tag = 1;
     attribute_t* at_p = NULL;
