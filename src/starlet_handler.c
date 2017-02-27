@@ -17,8 +17,8 @@ void xmlstarlet_server() {
 
     while(1) {
 
-        int req = open("bin/xmlvalreq", O_RDONLY);
-        int res = open("bin/xmlvalres", O_WRONLY);
+        int req = open("api/xmlvalreq", O_RDONLY);
+        int res = open("api/xmlvalres", O_WRONLY);
 
         int child = fork();
         if (0 == child) {

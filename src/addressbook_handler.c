@@ -7,8 +7,8 @@
 #include "xml_serializer.c"
 
 #define DB_PATH "/api/addressbook.db"
-#define VALREQ "/bin/xmlvalreq"
-#define VALRES "/bin/xmlvalres"
+#define VALREQ "/api/xmlvalreq"
+#define VALRES "/api/xmlvalres"
 
 #define BUFFER_SIZE 1024
 
