@@ -235,6 +235,8 @@ void handle_post_request(header_t req) {
     }
 
     sqlite3_exec(db, "BEGIN TRANSACTION", 0, 0, 0);
+    
+    int changes = 0;
 
     node_t* contact = contacts -> nodes;
     while (contact) {
@@ -290,12 +292,12 @@ void handle_post_request(header_t req) {
             exit(0);
         }
 
+        changes += sqlite3_changes(db);
+
         sqlite3_reset(sql_statement);
 
         contact = contact -> sibling;
     }
-    
-    int changes = sqlite3_changes(db);
 
     sqlite3_exec(db, "END TRANSACTION", 0, 0, 0);
     sqlite3_finalize(sql_statement);
