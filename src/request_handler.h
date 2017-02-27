@@ -24,6 +24,7 @@ typedef enum { PLAIN
              , HTML
              , CSS
              , PNG
+             , GIF
              , XML
              , XSL
              , DTD

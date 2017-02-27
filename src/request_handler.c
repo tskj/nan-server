@@ -25,6 +25,8 @@ mime_t resolve_extension(char* filename) {
         return CSS;
     if (!strcmp(filename + i, "png"))
         return PNG;
+    if (!strcmp(filename + i, "gif"))
+        return GIF;
     if (!strcmp(filename + i, "xml"))
         return XML;
     if (!strcmp(filename + i, "xsl"))
@@ -184,6 +186,8 @@ void send_header(status_code_t status_code, header_t h) {
         case CSS:       printf("text/css; charset=utf-8\n");
                         break;
         case PNG:       printf("image/png\n");
+                        break;
+        case GIF:       printf("image/gif\n");
                         break;
         case XML:       printf("application/xml; charset=utf-8\n");
                         break;

@@ -527,7 +527,7 @@ void handle_delete_request(header_t req) {
         send_header(NOT_FOUND, req);
     } else {
         send_header(OK, req);
-        printf("%d", changes)
+        printf("%d", changes);
     }
 }
 
