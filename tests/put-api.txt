@@ -1,8 +1,8 @@
-PUT /api/addressbook/2 HTTP/1.1
+PUT /api/addressbook/3 HTTP/1.1
 
 <contacts>
 	<contact>
-		<id>2</id>
+		<id>4</id>
 		<name>hei</name>
 		<tlf>1234</tlf>
 	</contact>

@@ -442,19 +442,23 @@ void handle_put_request(header_t req) {
 
     rc = sqlite3_step(sql_statement);
 
+    if (rc == SQLITE_CONSTRAINT) {
+        sqlite3_finalize(sql_statement);
+        sqlite3_close(db);
+        send_header(METHOD_NOT_ALLOWED, req);
+    } else if (rc != SQLITE_DONE) {
+        sqlite3_finalize(sql_statement);
+        sqlite3_close(db);
+        send_header(INTERNAL_SERVER_ERROR, req);
+        exit(0);
+    }
+
     // ID likely didn't exist
     if (sqlite3_changes(db) != 1) {
         sqlite3_finalize(sql_statement);
         sqlite3_close(db);
 
         send_header(NOT_FOUND, req);
-        exit(0);
-    }
-
-    if (rc != SQLITE_DONE) {
-        sqlite3_finalize(sql_statement);
-        sqlite3_close(db);
-        send_header(INTERNAL_SERVER_ERROR, req);
         exit(0);
     }
 
